@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Model.Entities.Heroes; 
+namespace Model.Entities.Heroes.PlayerLevels; 
 
 [Table("PLAYER_LEVELS")]
 public class PlayerLevel {
