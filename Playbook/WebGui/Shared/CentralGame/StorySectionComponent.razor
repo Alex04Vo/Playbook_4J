@@ -4,10 +4,10 @@
 
 <MudCard>
     <MudCardHeader>
-        <h4 class="text-primary">@Section.Book.Title - @Section.SectionNumber</h4>
+        <MudText Color="Color.Primary" Typo="Typo.h5">@Section.Book.Title - @Section.SectionNumber</MudText>
     </MudCardHeader>
     <MudCardContent>
-        <div>@Section.Content</div>
+        <MudText Typo="Typo.body1">@Section.Content</MudText>
         <br/>
         <MudDivider/>
         <br/>

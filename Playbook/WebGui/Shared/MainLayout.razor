@@ -6,39 +6,60 @@
     FullWidth="true"
     CloseButton="true"
     DisableBackdropClick="true"
-    Position="DialogPosition.Center"
-/>
+    Position="DialogPosition.Center"/>
 
 <MudSnackbarProvider/>
 
 <PageTitle>WebGui</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
+        <MudLink Typo="Typo.h5" Class="ml-3" Underline="Underline.None" Color="Color.Inherit" Href="/">Playbook</MudLink>
+        <MudSpacer/>
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End"/>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"
+               OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
+        <MudNavMenu Dense="false" Bordered="false" Rounded="true">
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" IconColor="Color.Tertiary" Href="/">
+                <MudText Color="Color.Tertiary" Typo="Typo.body1">Home</MudText>
+            </MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" IconColor="Color.Tertiary" Href="/books/1/sections/1">
+                 <MudText Color="Color.Tertiary" Typo="Typo.body1">Library</MudText>
+            </MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Group" IconColor="Color.Tertiary">
+                 <MudText Color="Color.Tertiary" Typo="Typo.body1">Community</MudText>
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Class="py-4" MaxWidth="MaxWidth.ExtraLarge">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
 
 @code{
+
     readonly MudTheme _myCustomTheme = new MudTheme() {
         Palette = new Palette() {
-            Primary = "#307160",
-            Secondary = "#6f9467",
-            Tertiary = "#9eb08d",
+            Primary = "#1259A1",
+            Secondary = "#3EB3E6",
+            Tertiary = "#E69E27",
+            Background = "#F5F5F5"
         },
         LayoutProperties = new LayoutProperties() {
             DrawerWidthLeft = "260px",
             DrawerWidthRight = "300px"
         }
     };
+
+    bool _drawerOpen = false;
+
+    void DrawerToggle() {
+        _drawerOpen = !_drawerOpen;
+    }
+
 }
