@@ -2,11 +2,13 @@ using Domain.Repositories.Implementation;
 using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Model.Configuration;
 using MudBlazor.Services;
+using WebGui;
 using WebGui.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +37,7 @@ builder.Services.AddScoped<IUserRoleClaimRepository, UserRoleClaimRepository>();
 builder.Services.AddMudServices();
 builder.Services.AddLogging();
 
+builder.Services.AddScoped<CircuitHandler, CircuitTracker>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<UserService>();
 
