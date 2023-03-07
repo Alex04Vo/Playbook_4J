@@ -24,4 +24,9 @@
       <Folder Include="Data" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Home\HomePage.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Home\LandingPage.razor" />
+    </ItemGroup>
+
 </Project>

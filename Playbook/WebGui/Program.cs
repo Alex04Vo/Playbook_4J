@@ -1,3 +1,5 @@
+using Domain.Handler.Implementation;
+using Domain.Handler.Interfaces;
 using Domain.Repositories.Implementation;
 using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Components;
@@ -29,6 +31,7 @@ builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IStorySectionRepository, StorySectionRepository>();
 
 
+builder.Services.AddScoped<IThemeHandler, ThemeHandler>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IUserRoleClaimRepository, UserRoleClaimRepository>();
