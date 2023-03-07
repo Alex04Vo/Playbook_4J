@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using WebGui.Services
+@inherits LayoutComponentBase
+@inject UserService UserService
+@inject NavigationManager NavManager
 
 <MudThemeProvider Theme="_myCustomTheme"/>
 
@@ -13,12 +16,7 @@
 <PageTitle>WebGui</PageTitle>
 
 <MudLayout>
-    <MudAppBar Elevation="1" Color="Color.Primary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
-        <MudLink Typo="Typo.h5" Class="ml-3" Underline="Underline.None" Color="Color.Inherit" Href="/">Playbook</MudLink>
-        <MudSpacer/>
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End"/>
-    </MudAppBar>
+    <CustomAppBar/>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"
                OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
         <MudNavMenu Dense="false" Bordered="false" Rounded="true">
@@ -26,11 +24,18 @@
                 <MudText Color="Color.Tertiary" Typo="Typo.body1">Home</MudText>
             </MudNavLink>
             <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" IconColor="Color.Tertiary" Href="/books/1/sections/1">
-                 <MudText Color="Color.Tertiary" Typo="Typo.body1">Library</MudText>
+                <MudText Color="Color.Tertiary" Typo="Typo.body1">Sections</MudText>
             </MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Group" IconColor="Color.Tertiary">
-                 <MudText Color="Color.Tertiary" Typo="Typo.body1">Community</MudText>
-            </MudNavLink>
+            @if (UserService.CurrentUser is not null) {
+                <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Tertiary" OnClick="Logout">
+                    <MudText Color="Color.Tertiary" Typo="Typo.body1">Logout</MudText>
+                </MudNavLink>
+            }
+            else {
+                <MudNavLink Icon="@Icons.Material.Filled.Login" IconColor="Color.Tertiary" OnClick="Login">
+                    <MudText Color="Color.Tertiary" Typo="Typo.body1">Login</MudText>
+                </MudNavLink>
+            }
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>
@@ -57,9 +62,17 @@
     };
 
     bool _drawerOpen = false;
-
     void DrawerToggle() {
         _drawerOpen = !_drawerOpen;
+    }
+    
+    private async Task Logout() {
+        await UserService.LogoutAsync();
+        NavManager.NavigateTo($"/");
+    }
+    
+    private void Login() {
+        NavManager.NavigateTo($"/auth");
     }
 
 }

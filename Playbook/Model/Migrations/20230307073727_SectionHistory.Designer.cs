@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model.Configuration;
 
@@ -10,9 +11,10 @@ using Model.Configuration;
 namespace Model.Migrations
 {
     [DbContext(typeof(PlaybookContext))]
-    partial class PlaybookContextModelSnapshot : ModelSnapshot
+    [Migration("20230307073727_SectionHistory")]
+    partial class SectionHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

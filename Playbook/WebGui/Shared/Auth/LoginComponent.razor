@@ -1,0 +1,89 @@
+@using Domain.Exceptions
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Users.Models
+@using WebGui.Services
+@inject UserService UserService
+@inject IUserRepository UserRepo
+@inject NavigationManager NavManager
+@inject ILogger<LoginComponent> _logger
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudCardContent>
+        <MudText Typo="Typo.h4">Login</MudText>
+        <MudTextField Label="Username *" Class="mt-3"
+                      @bind-Value="Model.UserName" For="@(() => Model.UserName)"/>
+        <MudTextField Label="Password *"
+                      HelperText="" Class="mt-3"
+                      @bind-Value="Model.Password"
+                      For="@(() => Model.Password)"
+                      Adornment="Adornment.End"
+                      InputType="@_pwdInputType"
+                      AdornmentIcon="@_pwdInputIcon"
+                      OnAdornmentClick="ShowPwd"/>
+    </MudCardContent>
+    <MudCardActions>
+        @if (_loginInformationIncorrect) {
+            <MudAlert Severity="Severity.Error">
+                Username oder Passwort ist falsch!
+            </MudAlert>
+        }
+        <MudButton ButtonType="ButtonType.Submit" @onclick="HandleLoginAsync" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Anmelden</MudButton>
+    </MudCardActions>
+</EditForm>
+
+@code {
+    private bool _isLoggingIn = false;
+    private bool _loginInformationIncorrect = false;
+
+    LoginModel Model { get; } = new();
+    bool success;
+
+    private InputType _pwdInputType = InputType.Password;
+    private string _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    async Task HandleLoginAsync() {
+        try {
+            _isLoggingIn = true;
+            await UserService.LoginAsync(Model);
+            _isLoggingIn = false;
+            _loginInformationIncorrect = false;
+
+            NavManager.NavigateTo("/");
+        }
+        catch (LoginException) {
+    // this is the only exception that can be thrown by the login method (we wrote that ourselves :))
+            _loginInformationIncorrect = true;
+        }
+        catch (TaskCanceledException) {
+            _logger.LogInformation("Login canceled");
+        }
+        catch (OperationCanceledException) {
+            _logger.LogInformation("Login canceled");
+        }
+        catch (Exception e) {
+            _logger.LogError(e, "Login failed");
+        }
+        finally {
+            _isLoggingIn = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowPwd() {
+        if (_pwdInputIcon == Icons.Material.Filled.Visibility) {
+            _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+            _pwdInputType = InputType.Password;
+        }
+        else {
+            _pwdInputIcon = Icons.Material.Filled.Visibility;
+            _pwdInputType = InputType.Text;
+        }
+    }
+
+    private void OnValidSubmit(EditContext context) {
+        success = true;
+        StateHasChanged();
+    }
+
+}

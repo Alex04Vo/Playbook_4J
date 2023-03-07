@@ -12,8 +12,7 @@ public class LoginModel {
         Password = password;
     }
 
-    [Required] 
-    [EmailAddress] 
+    [Required]
     public string UserName { get; set; } = null!;
 
     [Required] 

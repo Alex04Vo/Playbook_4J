@@ -94,6 +94,7 @@ public class PlaybookContext : DbContext {
     public DbSet<HeroOwnership> HeroOwnerships { get; set; }
     public DbSet<Inventory> Inventories { get; set; }
     public DbSet<InventoryItem> InventoryItems { get; set; }
+    public DbSet<SectionHistory> SectionHistories { get; set; }
     
     public PlaybookContext(DbContextOptions<PlaybookContext> options) : base(options) {
         
@@ -257,11 +258,7 @@ public class PlaybookContext : DbContext {
             .HasOne(b => b.Book)
             .WithMany()
             .HasForeignKey(b => b.BookId);
-        builder.Entity<PlayedBook>()
-            .HasOne(b => b.CurrentSection)
-            .WithMany()
-            .HasForeignKey(b => b.CurrentSectionId);
-        
+
         // Inventory - INVENTORIES
         builder.Entity<Inventory>()
             .Property(i => i.InventoryState)
@@ -296,5 +293,17 @@ public class PlaybookContext : DbContext {
             .HasOne(i => i.Item)
             .WithMany()
             .HasForeignKey(i => i.ItemId);
+        
+        // SectionHistory - SB_HAS_SECTIONS_JT
+        builder.Entity<SectionHistory>()
+            .HasKey(h => new {h.SessionId, h.BookId, h.SectionId, h.Timestamp});
+        builder.Entity<SectionHistory>()
+            .HasOne(h => h.PlayedBook)
+            .WithMany()
+            .HasForeignKey(h => new {h.SessionId, h.BookId});
+        builder.Entity<SectionHistory>()
+            .HasOne(h => h.Section)
+            .WithMany()
+            .HasForeignKey(h => h.SectionId);
     }
 }

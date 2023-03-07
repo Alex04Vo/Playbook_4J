@@ -1,0 +1,27 @@
+﻿@inject NavigationManager NavManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-sm-auto"></div>
+        <div class="col-lg-6 col-sm-10">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">Bitte Anmelden!</MudText>
+                    <br/>
+                    <MudText Typo="Typo.body1">Melden Sie sich an um auf der Seite fortzufahren.</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton OnClick="NavigateToAuth" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+        <div class="col-lg-3 col-sm-auto"></div>
+    </div>
+</div>
+
+@code {
+
+    private void NavigateToAuth() {
+        NavManager.NavigateTo("/auth");
+    }
+}

@@ -1,0 +1,127 @@
+﻿@using Domain.Repositories.Interfaces
+@using Model.Entities.Users
+@using Domain.Exceptions
+@using Model.Entities.Users.Models
+
+@using WebGui.Services
+
+@inject UserService UserService
+@inject NavigationManager NavManager
+@inject ILogger<RegisterComponent> _logger
+
+<EditForm Model="@_model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudCardContent>
+        @if (_registrationCompleted == false) {
+            <MudText Typo="Typo.h4">Registration</MudText>
+            <MudTextField Label="Username *"
+                          @bind-Value="_model.UserName"
+                          For="@(() => _model.UserName)"/>
+            <MudTextField Label="Passwort *" Class="mt-3"
+                          HelperText="Choose a strong password"
+                          @bind-Value="_model.LoginPassword"
+                          For="@(() => _model.LoginPassword)"
+                          Adornment="Adornment.End"
+                          InputType="@_pwdInputType"
+                          AdornmentIcon="@_pwdInputIcon"
+                          OnAdornmentClick="ShowPwd"/>
+            <MudTextField Label="Passwort *" Class="mt-3"
+                          HelperText="Repeat the password"
+                          @bind-Value="_passwordRepetition"
+                          For="@(() => _passwordRepetition)"
+                          Adornment="Adornment.End"
+                          InputType="@_pwdInputType"
+                          AdornmentIcon="@_pwdInputIcon"
+                          OnAdornmentClick="ShowPwd"/>
+        }
+        else {
+            <MudAlert Severity="Severity.Success">
+                Registration war erfolgreich!
+            </MudAlert>
+        }
+
+    </MudCardContent>
+    @if (_registrationCompleted == false) {
+        <MudCardActions>
+            @if (!String.IsNullOrWhiteSpace(_error)) {
+                <MudAlert Severity="Severity.Error">
+                    @_error
+                </MudAlert>
+            }
+            <MudButton ButtonType="ButtonType.Submit" @onclick="HandleRegisterAsync" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Registrieren</MudButton>
+        </MudCardActions>
+    }
+</EditForm>
+
+@code {
+    User _model = new();
+    string _passwordRepetition = "";
+
+    bool _success = false;
+    bool _isRegistering;
+    private bool _registrationCompleted = false;
+
+    private InputType _pwdInputType = InputType.Password;
+    private string _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+    
+    private string _error = "";
+
+    private async Task HandleRegisterAsync() {
+        try {
+            if (_model.LoginPassword==_passwordRepetition) {
+                _isRegistering = true;
+
+                await UserService.RegisterAsync(_model);
+                //await UserService.LoginAsync(new LoginModel(RegUser.Email, RegUser.LoginPassword));
+                //_logger.LogInformation("{Time} - Registration of User: Id {UsrId}, Email: {UsrEmail}", DateTime.Now, _model.NewFormUser.Id, _model.NewFormUser.Email);
+
+                _error = "";
+                _registrationCompleted = true;
+
+                await UserService.LoginAsync(new LoginModel(_model.UserName, _model.LoginPassword));
+                _model = new();
+                _passwordRepetition = "";
+                NavManager.NavigateTo("/");
+            }
+            else {
+                _error = "Passwort muss übereinstimmen!";
+            }
+        }
+        catch (DuplicateUserNameException) {
+            _error = "Username ist bereits registriert!";
+        }
+        //catch (LoginException) {
+        //    _error = "Invalid email or Password!";
+        //}
+        catch (TaskCanceledException) {
+            _logger.LogInformation("Register/Login canceled");
+        }
+        catch (OperationCanceledException) {
+            _logger.LogInformation("Register/Login canceled");
+        }
+        catch (Exception e) {
+            _logger.LogError(e, "Register/Login failed");
+        }
+        finally {
+            _isRegistering = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowPwd() {
+        if (_pwdInputIcon == Icons.Material.Filled.Visibility) {
+            _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+            _pwdInputType = InputType.Password;
+        }
+        else {
+            _pwdInputIcon = Icons.Material.Filled.Visibility;
+            _pwdInputType = InputType.Text;
+        }
+    }
+
+    private void OnValidSubmit(EditContext context) {
+        _success = true;
+        StateHasChanged();
+    }
+
+}
