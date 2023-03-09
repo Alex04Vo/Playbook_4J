@@ -1,0 +1,27 @@
+﻿@using Model.Entities.Sessions
+<MudCard Style="background-color:  rgb(18, 89, 161, 0.05);">
+    <MudCardHeader>
+        <MudText Typo="Typo.h5">@Session.Name - @Session.Hero.Name</MudText>
+        <MudSpacer/>
+        <MudButton Color="Color.Tertiary" Variant="Variant.Filled">Weiter</MudButton>
+    </MudCardHeader>
+    <MudCardContent>
+        @if (Session.BooksPlaying.Any()) {
+            <MudText Typo="Typo.h5">CurrentBook: @Session.BooksPlaying.First().Book.Title</MudText>
+        }
+
+    </MudCardContent>
+    <MudCardActions>
+        <MudSpacer/>
+        @if (Session.BooksPlaying.Any()) {
+            <MudText Typo="Typo.caption">@Session.BooksPlaying.First().LastTimePlayed</MudText>
+        }
+    </MudCardActions>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public Session Session { get; set; } = new();
+
+}

@@ -15,4 +15,15 @@ public class PlayedBook {
     [Column("BOOK_ID")]
     public int BookId { get; set; }
     public Book Book { get; set; }
+
+    [Required] 
+    [Column("IS_COMPLETED")] 
+    public bool IsCompleted { get; set; } = false;
+    
+    [Required, DataType(DataType.DateTime)]
+    [Column("LAST_TIME_PLAYED")]
+    public DateTime LastTimePlayed { get; set; } = DateTime.UnixEpoch;
+
+    [NotMapped] 
+    public List<SectionHistory> Sections { get; set; } = new();
 }

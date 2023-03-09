@@ -26,9 +26,10 @@ builder.Services.AddDbContextFactory<PlaybookContext>(
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-// builder.Services.AddSingleton<WeatherForecastService>();
+
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IStorySectionRepository, StorySectionRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 
 
 builder.Services.AddScoped<IThemeHandler, ThemeHandler>();

@@ -21,6 +21,10 @@ public class UserService {
 
     public User? CurrentUser => _authenticationStateProvider.CurrentUser;
 
+    public void RegisterMethodForLoginStateChangeEvent(Func<bool> method) {
+        _authenticationStateProvider.LoginStateChanged += method;
+    }
+
     public Task<AuthenticationState> GetAuthenticationStateAsync() =>
         _authenticationStateProvider.GetAuthenticationStateAsync();
 

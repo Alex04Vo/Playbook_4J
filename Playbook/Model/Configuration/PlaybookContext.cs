@@ -95,6 +95,7 @@ public class PlaybookContext : DbContext {
     public DbSet<Inventory> Inventories { get; set; }
     public DbSet<InventoryItem> InventoryItems { get; set; }
     public DbSet<SectionHistory> SectionHistories { get; set; }
+    public DbSet<HeroAbility> HeroAbilities { get; set; }
     
     public PlaybookContext(DbContextOptions<PlaybookContext> options) : base(options) {
         
@@ -252,7 +253,7 @@ public class PlaybookContext : DbContext {
 
         builder.Entity<PlayedBook>()
             .HasOne(b => b.Session)
-            .WithMany()
+            .WithMany(s=>s.BooksPlaying)
             .HasForeignKey(b => b.SessionId);
         builder.Entity<PlayedBook>()
             .HasOne(b => b.Book)
@@ -267,8 +268,8 @@ public class PlaybookContext : DbContext {
         // Hero - HEROES
         builder.Entity<Hero>()
             .HasOne(h => h.Session)
-            .WithMany()
-            .HasForeignKey(h => h.SessionId);
+            .WithOne(s=>s.Hero)
+            .HasForeignKey<Hero>(h => h.SessionId);
         builder.Entity<Hero>()
             .HasOne(h => h.HeroLevel)
             .WithMany()
@@ -299,11 +300,24 @@ public class PlaybookContext : DbContext {
             .HasKey(h => new {h.SessionId, h.BookId, h.SectionId, h.Timestamp});
         builder.Entity<SectionHistory>()
             .HasOne(h => h.PlayedBook)
-            .WithMany()
+            .WithMany(h=>h.Sections)
             .HasForeignKey(h => new {h.SessionId, h.BookId});
         builder.Entity<SectionHistory>()
             .HasOne(h => h.Section)
             .WithMany()
             .HasForeignKey(h => h.SectionId);
+        
+        //HeroAbility - HERO_HAS_ABILITIES
+        builder.Entity<HeroAbility>()
+            .HasKey(a => new {a.HeroId, a.AbilityType});
+        
+        builder.Entity<HeroAbility>()
+            .HasOne(a => a.Hero)
+            .WithMany(h=>h.Abilities)
+            .HasForeignKey(a => a.HeroId);
+        builder.Entity<HeroAbility>()
+            .HasOne(a => a.Ability)
+            .WithMany()
+            .HasForeignKey(a => a.AbilityType);
     }
 }

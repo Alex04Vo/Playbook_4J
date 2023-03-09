@@ -13,8 +13,8 @@ public class LoginModel {
     }
 
     [Required]
-    public string UserName { get; set; } = null!;
+    public string UserName { get; set; } = "";
 
     [Required] 
-    public string Password { get; set; } = null!;
+    public string Password { get; set; } = "";
 }

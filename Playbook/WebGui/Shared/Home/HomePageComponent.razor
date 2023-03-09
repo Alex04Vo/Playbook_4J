@@ -1,19 +1,34 @@
 ﻿@using WebGui.Services
+@using Model.Entities.Sessions
+@using Domain.Repositories.Interfaces
 @inject UserService UserService
+@inject ISessionRepository SessionRepository
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudCard>
         <MudCardHeader>
-            <div>
-                <MudText Typo="Typo.h4" Color="Color.Primary">Welcome, @UserService.CurrentUser!.UserName !</MudText>
-            </div>
+            <MudText Typo="Typo.h4" Color="Color.Primary">@(Random.Shared.Next(0,100) < 75 ? "Welcome back, " : "Hello, ") @UserService.CurrentUser!.UserName !</MudText>
+            <MudSpacer/>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled">Create new Session</MudButton>
         </MudCardHeader>
         <MudCardContent>
-            
+            @foreach (var session in Sessions) {
+                <SessionComponent Session="session"/>
+            }
         </MudCardContent>
     </MudCard>
 </MudContainer>
 
+
 @code {
+
+    public List<Session> Sessions { get; set; } = new();
+    
+    protected override async Task OnParametersSetAsync() {
+        @if (UserService.CurrentUser is not null) {
+            Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+        }
+        
+    }
 
 }

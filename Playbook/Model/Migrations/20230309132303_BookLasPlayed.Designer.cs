@@ -11,8 +11,8 @@ using Model.Configuration;
 namespace Model.Migrations
 {
     [DbContext(typeof(PlaybookContext))]
-    [Migration("20230306210038_SessionsAndHeroes")]
-    partial class SessionsAndHeroes
+    [Migration("20230309132303_BookLasPlayed")]
+    partial class BookLasPlayed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -275,9 +275,27 @@ namespace Model.Migrations
 
                     b.HasIndex("InventoryId");
 
-                    b.HasIndex("SessionId");
+                    b.HasIndex("SessionId")
+                        .IsUnique();
 
                     b.ToTable("HEROES");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.HeroAbility", b =>
+                {
+                    b.Property<int>("HeroId")
+                        .HasColumnType("int")
+                        .HasColumnName("HERO_ID");
+
+                    b.Property<string>("AbilityType")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ABILITY_TYPE");
+
+                    b.HasKey("HeroId", "AbilityType");
+
+                    b.HasIndex("AbilityType");
+
+                    b.ToTable("HERO_HAS_ABILITIES_JT");
                 });
 
             modelBuilder.Entity("Model.Entities.Heroes.HeroOwnership", b =>
@@ -517,10 +535,6 @@ namespace Model.Migrations
                         .HasColumnType("int")
                         .HasColumnName("BOOK_ID");
 
-                    b.Property<int>("CurrentSectionId")
-                        .HasColumnType("int")
-                        .HasColumnName("CURRENT_SECTION_ID");
-
                     b.Property<DateTime>("LastTimePlayed")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("LAST_TIME_PLAYED");
@@ -529,9 +543,32 @@ namespace Model.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.HasIndex("CurrentSectionId");
-
                     b.ToTable("SESSION_HAS_BOOKS_JT");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.SectionHistory", b =>
+                {
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SESSION_ID");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int")
+                        .HasColumnName("BOOK_ID");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SECTION_ID");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("TIMESTAMP");
+
+                    b.HasKey("SessionId", "BookId", "SectionId", "Timestamp");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("SB_HAS_SECTIONS_JT");
                 });
 
             modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
@@ -1098,8 +1135,8 @@ namespace Model.Migrations
                         .IsRequired();
 
                     b.HasOne("Model.Entities.Sessions.Session", "Session")
-                        .WithMany()
-                        .HasForeignKey("SessionId")
+                        .WithOne("Hero")
+                        .HasForeignKey("Model.Entities.Heroes.Hero", "SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1110,6 +1147,25 @@ namespace Model.Migrations
                     b.Navigation("Inventory");
 
                     b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.HeroAbility", b =>
+                {
+                    b.HasOne("Model.Entities.Abilities.Ability", "Ability")
+                        .WithMany()
+                        .HasForeignKey("AbilityType")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Heroes.Hero", "Hero")
+                        .WithMany("Abilities")
+                        .HasForeignKey("HeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ability");
+
+                    b.Navigation("Hero");
                 });
 
             modelBuilder.Entity("Model.Entities.Heroes.Inventories.InventoryItem", b =>
@@ -1189,23 +1245,34 @@ namespace Model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Model.Entities.Sections.ASection", "CurrentSection")
-                        .WithMany()
-                        .HasForeignKey("CurrentSectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Model.Entities.Sessions.Session", "Session")
-                        .WithMany()
+                        .WithMany("BooksPlaying")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Book");
 
-                    b.Navigation("CurrentSection");
-
                     b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.SectionHistory", b =>
+                {
+                    b.HasOne("Model.Entities.Sections.ASection", "Section")
+                        .WithMany()
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Sessions.PlayedBook", "PlayedBook")
+                        .WithMany("Sections")
+                        .HasForeignKey("SessionId", "BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlayedBook");
+
+                    b.Navigation("Section");
                 });
 
             modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
@@ -1536,6 +1603,24 @@ namespace Model.Migrations
                         .WithOne()
                         .HasForeignKey("Model.Entities.Events.SubEvents.ValueEffects.RationAmountEvent", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.Hero", b =>
+                {
+                    b.Navigation("Abilities");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.PlayedBook", b =>
+                {
+                    b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
+                {
+                    b.Navigation("BooksPlaying");
+
+                    b.Navigation("Hero")
                         .IsRequired();
                 });
 

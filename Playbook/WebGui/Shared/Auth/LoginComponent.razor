@@ -11,21 +11,23 @@
     <DataAnnotationsValidator/>
     <MudCardContent>
         <MudText Typo="Typo.h4">Login</MudText>
-        <MudTextField Label="Username *" Class="mt-3"
-                      @bind-Value="Model.UserName" For="@(() => Model.UserName)"/>
-        <MudTextField Label="Password *"
+        <MudTextField Label="Username " Class="mt-3"
+                      @bind-Value="Model.UserName" For="@(() => Model.UserName)"
+                      Required="true"/>
+        <MudTextField Label="Password "
                       HelperText="" Class="mt-3"
                       @bind-Value="Model.Password"
                       For="@(() => Model.Password)"
+                      Required="true"
                       Adornment="Adornment.End"
                       InputType="@_pwdInputType"
                       AdornmentIcon="@_pwdInputIcon"
                       OnAdornmentClick="ShowPwd"/>
     </MudCardContent>
     <MudCardActions>
-        @if (_loginInformationIncorrect) {
+        @if (!String.IsNullOrWhiteSpace(_error)) {
             <MudAlert Severity="Severity.Error">
-                Username oder Passwort ist falsch!
+               @_error
             </MudAlert>
         }
         <MudButton ButtonType="ButtonType.Submit" @onclick="HandleLoginAsync" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Anmelden</MudButton>
@@ -36,7 +38,13 @@
     private bool _isLoggingIn = false;
     private bool _loginInformationIncorrect = false;
 
-    LoginModel Model { get; } = new();
+    private string _error = "";
+
+    LoginModel Model { get; } = new()
+    {
+        UserName = "",
+        Password = ""
+    };
     bool success;
 
     private InputType _pwdInputType = InputType.Password;
@@ -44,16 +52,22 @@
 
     async Task HandleLoginAsync() {
         try {
-            _isLoggingIn = true;
-            await UserService.LoginAsync(Model);
-            _isLoggingIn = false;
-            _loginInformationIncorrect = false;
+            if (!String.IsNullOrWhiteSpace(Model.UserName) && !String.IsNullOrWhiteSpace(Model.Password)) {
+                _error = "";
+                _isLoggingIn = true;
+                await UserService.LoginAsync(Model);
+                _isLoggingIn = false;
+                _loginInformationIncorrect = false;
 
-            NavManager.NavigateTo("/");
+                NavManager.NavigateTo("/");
+            }
+            else {
+                _error = "Username or Password not entered!";
+            }
         }
         catch (LoginException) {
     // this is the only exception that can be thrown by the login method (we wrote that ourselves :))
-            _loginInformationIncorrect = true;
+            _error = "Username or Password incorrect!";
         }
         catch (TaskCanceledException) {
             _logger.LogInformation("Login canceled");
@@ -63,6 +77,7 @@
         }
         catch (Exception e) {
             _logger.LogError(e, "Login failed");
+            _error = "Login failed, please reload!";
         }
         finally {
             _isLoggingIn = false;

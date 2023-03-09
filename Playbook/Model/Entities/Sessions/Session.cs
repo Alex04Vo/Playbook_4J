@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Model.Entities.Heroes;
 using Model.Entities.Users;
 
 namespace Model.Entities.Sessions; 
@@ -22,4 +23,10 @@ public class Session {
     [Column("USER_ID")]
     public int UserId { get; set; }
     public User User { get; set; }
+
+    [NotMapped] 
+    public List<PlayedBook> BooksPlaying { get; set; } = new();
+    
+    [NotMapped]
+    public Hero Hero { get; set; }
 }

@@ -18,26 +18,9 @@
 <MudLayout>
     <CustomAppBar/>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"
-               OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
-        <MudNavMenu Dense="false" Bordered="false" Rounded="true">
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" IconColor="Color.Tertiary" Href="/">
-                <MudText Color="Color.Tertiary" Typo="Typo.body1">Home</MudText>
-            </MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" IconColor="Color.Tertiary" Href="/books/1/sections/1">
-                <MudText Color="Color.Tertiary" Typo="Typo.body1">Sections</MudText>
-            </MudNavLink>
-            @if (UserService.CurrentUser is not null) {
-                <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Tertiary" OnClick="Logout">
-                    <MudText Color="Color.Tertiary" Typo="Typo.body1">Logout</MudText>
-                </MudNavLink>
-            }
-            else {
-                <MudNavLink Icon="@Icons.Material.Filled.Login" IconColor="Color.Tertiary" OnClick="Login">
-                    <MudText Color="Color.Tertiary" Typo="Typo.body1">Login</MudText>
-                </MudNavLink>
-            }
-        </MudNavMenu>
-    </MudDrawer>
+                   OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
+        <CustomDrawerNavMenu/>
+        </MudDrawer>
     <MudMainContent>
         <MudContainer Class="py-4" MaxWidth="MaxWidth.ExtraLarge">
             @Body

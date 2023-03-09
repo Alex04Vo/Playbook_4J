@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Model.Entities.Abilities;
 using Model.Entities.Heroes.Inventories;
 using Model.Entities.Heroes.PlayerLevels;
 using Model.Entities.Sessions;
@@ -39,4 +40,7 @@ public class Hero {
     [Column("INVENTORY_ID")]
     public int InventoryId { get; set; }
     public Inventory Inventory { get; set; }
+
+    [NotMapped]
+    public List<HeroAbility> Abilities { get; set; }
 }

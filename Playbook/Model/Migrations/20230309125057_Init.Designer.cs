@@ -11,8 +11,8 @@ using Model.Configuration;
 namespace Model.Migrations
 {
     [DbContext(typeof(PlaybookContext))]
-    [Migration("20221219124839_InitMig")]
-    partial class InitMig
+    [Migration("20230309125057_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -229,6 +229,151 @@ namespace Model.Migrations
                     b.ToTable("EVENTS_BT");
                 });
 
+            modelBuilder.Entity("Model.Entities.Heroes.Hero", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("HERO_ID");
+
+                    b.Property<int>("CombatSkill")
+                        .HasColumnType("int")
+                        .HasColumnName("COMBAT_SKILL");
+
+                    b.Property<int>("Endurance")
+                        .HasColumnType("int")
+                        .HasColumnName("ENDURANCE");
+
+                    b.Property<string>("HeroLevelValue")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("HERO_LEVEL");
+
+                    b.Property<int>("HeroOwnershipId")
+                        .HasColumnType("int")
+                        .HasColumnName("HERO_OWNERSHIP_ID");
+
+                    b.Property<int>("InventoryId")
+                        .HasColumnType("int")
+                        .HasColumnName("INVENTORY_ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("NAME");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SESSION_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HeroLevelValue");
+
+                    b.HasIndex("HeroOwnershipId");
+
+                    b.HasIndex("InventoryId");
+
+                    b.HasIndex("SessionId")
+                        .IsUnique();
+
+                    b.ToTable("HEROES");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.HeroAbility", b =>
+                {
+                    b.Property<int>("HeroId")
+                        .HasColumnType("int")
+                        .HasColumnName("HERO_ID");
+
+                    b.Property<string>("AbilityType")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ABILITY_TYPE");
+
+                    b.HasKey("HeroId", "AbilityType");
+
+                    b.HasIndex("AbilityType");
+
+                    b.ToTable("HERO_HAS_ABILITIES_JT");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.HeroOwnership", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("HERO_OWNERSHIP_ID");
+
+                    b.Property<int>("GoldCoins")
+                        .HasColumnType("int")
+                        .HasColumnName("GOLD_COINS");
+
+                    b.Property<int>("Rations")
+                        .HasColumnType("int")
+                        .HasColumnName("RATIONS");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HERO_OWNERSHIPS");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.Inventories.Inventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("INVENTORY_ID");
+
+                    b.Property<string>("InventoryState")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("INVENTORY_STATE");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("INVENTORIES");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.Inventories.InventoryItem", b =>
+                {
+                    b.Property<int>("InventoryId")
+                        .HasColumnType("int")
+                        .HasColumnName("INVENTORY_ID");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int")
+                        .HasColumnName("ITEM_ID");
+
+                    b.HasKey("InventoryId", "ItemId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("INVENTORY_HAS_ITEMS_JT");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.PlayerLevels.PlayerLevel", b =>
+                {
+                    b.Property<string>("Level")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("PLAYER_LEVEL");
+
+                    b.Property<int>("AbilityCount")
+                        .HasColumnType("int")
+                        .HasColumnName("ABILITY_COUNT");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("IMAGE_URL");
+
+                    b.HasKey("Level");
+
+                    b.ToTable("PLAYER_LEVELS");
+                });
+
             modelBuilder.Entity("Model.Entities.Items.AItem", b =>
                 {
                     b.Property<int>("Id")
@@ -296,27 +441,6 @@ namespace Model.Migrations
                     b.HasIndex("SectionId");
 
                     b.ToTable("OUTCOMES_BT");
-                });
-
-            modelBuilder.Entity("Model.Entities.Players.PlayerLevel", b =>
-                {
-                    b.Property<string>("Level")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("PLAYER_LEVEL");
-
-                    b.Property<int>("AbilityCount")
-                        .HasColumnType("int")
-                        .HasColumnName("ABILITY_COUNT");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("IMAGE_URL");
-
-                    b.HasKey("Level");
-
-                    b.ToTable("PLAYER_LEVELS");
                 });
 
             modelBuilder.Entity("Model.Entities.Regions.ARegion", b =>
@@ -399,6 +523,157 @@ namespace Model.Migrations
                         .IsUnique();
 
                     b.ToTable("IMAGE_DECORATORS");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.PlayedBook", b =>
+                {
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SECTION_ID");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int")
+                        .HasColumnName("BOOK_ID");
+
+                    b.HasKey("SessionId", "BookId");
+
+                    b.HasIndex("BookId");
+
+                    b.ToTable("SESSION_HAS_BOOKS_JT");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.SectionHistory", b =>
+                {
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SESSION_ID");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("int")
+                        .HasColumnName("BOOK_ID");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int")
+                        .HasColumnName("SECTION_ID");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("TIMESTAMP");
+
+                    b.HasKey("SessionId", "BookId", "SectionId", "Timestamp");
+
+                    b.HasIndex("SectionId");
+
+                    b.ToTable("SB_HAS_SECTIONS_JT");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("SESSION_ID");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)")
+                        .HasColumnName("NAME");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SESSIONS");
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ID");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("PASSWORD");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("USER_NAME");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("USERS");
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ROLE_ID");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("IDENTIFIER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Identifier")
+                        .IsUnique();
+
+                    b.ToTable("USER_ROLES");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Simple User",
+                            Identifier = "User"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Administrator",
+                            Identifier = "Admin"
+                        });
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.UserRoleClaim", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("USER_ID");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int")
+                        .HasColumnName("ROLE_ID");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("USER_HAS_ROLES_JT");
                 });
 
             modelBuilder.Entity("Model.Entities.Effects.ValueEffect", b =>
@@ -835,10 +1110,83 @@ namespace Model.Migrations
                     b.Navigation("Section");
                 });
 
+            modelBuilder.Entity("Model.Entities.Heroes.Hero", b =>
+                {
+                    b.HasOne("Model.Entities.Heroes.PlayerLevels.PlayerLevel", "HeroLevel")
+                        .WithMany()
+                        .HasForeignKey("HeroLevelValue")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Heroes.HeroOwnership", "HeroOwnership")
+                        .WithMany()
+                        .HasForeignKey("HeroOwnershipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Heroes.Inventories.Inventory", "Inventory")
+                        .WithMany()
+                        .HasForeignKey("InventoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Sessions.Session", "Session")
+                        .WithOne("Hero")
+                        .HasForeignKey("Model.Entities.Heroes.Hero", "SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HeroLevel");
+
+                    b.Navigation("HeroOwnership");
+
+                    b.Navigation("Inventory");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.HeroAbility", b =>
+                {
+                    b.HasOne("Model.Entities.Abilities.Ability", "Ability")
+                        .WithMany()
+                        .HasForeignKey("AbilityType")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Heroes.Hero", "Hero")
+                        .WithMany("Abilities")
+                        .HasForeignKey("HeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ability");
+
+                    b.Navigation("Hero");
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.Inventories.InventoryItem", b =>
+                {
+                    b.HasOne("Model.Entities.Heroes.Inventories.Inventory", "Inventory")
+                        .WithMany()
+                        .HasForeignKey("InventoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Items.AItem", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Inventory");
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("Model.Entities.Outcomes.AOutcome", b =>
                 {
                     b.HasOne("Model.Entities.Sections.StorySections.StorySection", "RootSection")
-                        .WithMany()
+                        .WithMany("Outcomes")
                         .HasForeignKey("RootSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -883,6 +1231,74 @@ namespace Model.Migrations
                         .IsRequired();
 
                     b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.PlayedBook", b =>
+                {
+                    b.HasOne("Model.Entities.Books.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Sessions.Session", "Session")
+                        .WithMany("BooksPlaying")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.SectionHistory", b =>
+                {
+                    b.HasOne("Model.Entities.Sections.ASection", "Section")
+                        .WithMany()
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Sessions.PlayedBook", "PlayedBook")
+                        .WithMany()
+                        .HasForeignKey("SessionId", "BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlayedBook");
+
+                    b.Navigation("Section");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
+                {
+                    b.HasOne("Model.Entities.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.UserRoleClaim", b =>
+                {
+                    b.HasOne("Model.Entities.Users.UserRole", "UserRole")
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Model.Entities.Users.User", "User")
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserRole");
                 });
 
             modelBuilder.Entity("Model.Entities.Effects.ValueEffect", b =>
@@ -1184,6 +1600,34 @@ namespace Model.Migrations
                         .HasForeignKey("Model.Entities.Events.SubEvents.ValueEffects.RationAmountEvent", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Model.Entities.Heroes.Hero", b =>
+                {
+                    b.Navigation("Abilities");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sessions.Session", b =>
+                {
+                    b.Navigation("BooksPlaying");
+
+                    b.Navigation("Hero")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.User", b =>
+                {
+                    b.Navigation("RoleClaims");
+                });
+
+            modelBuilder.Entity("Model.Entities.Users.UserRole", b =>
+                {
+                    b.Navigation("RoleClaims");
+                });
+
+            modelBuilder.Entity("Model.Entities.Sections.StorySections.StorySection", b =>
+                {
+                    b.Navigation("Outcomes");
                 });
 #pragma warning restore 612, 618
         }

@@ -7,26 +7,40 @@
 @inject IStorySectionRepository StorySectionRepository
 
 
-@if (Section is not null) {
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <StorySectionComponent Section="@Section"/>
-            </div>
-        </div>
-    </div>
-    
-}
+<PageTitle>MNAA - Auftritt</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        @if (true) {
+            @if (Section is not null) {
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <StorySectionComponent Section="@Section"/>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else {
+            <NotAuthorizedComponent/>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <NotAuthenticatedComponent/>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
+
     [Parameter, Required]
     public int BookId { get; set; }
-    
+
     [Parameter, Required]
     public int SectionNr { get; set; }
 
     public StorySection? Section { get; set; }
-    
+
     public List<AOutcome> Outcomes { get; set; } = new();
 
     protected override async Task OnParametersSetAsync() {
