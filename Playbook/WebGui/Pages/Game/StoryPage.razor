@@ -1,22 +1,31 @@
-﻿@page "/books/{BookId:int}/sections/{SectionNr:int}"
+﻿@page "/s/{SessionId:int}/books/{BookId:int}/sections/{SectionNr:int}"
 
 @using Model.Entities.Sections.StorySections
 @using Domain.Repositories.Interfaces
 @using System.ComponentModel.DataAnnotations
 @using Model.Entities.Outcomes
+@using Model.Entities.Sessions
+@using WebGui.Services
+@inject UserService UserService
+@inject SessionService SessionService
 @inject IStorySectionRepository StorySectionRepository
+@inject ISessionRepository SessionRepository
 
 
 <PageTitle>MNAA - Auftritt</PageTitle>
 <AuthorizeView>
     <Authorized>
-        @if (true) {
+        @if (_isAuthorizedForSession) {
             @if (Section is not null) {
                 <div class="container">
                     <div class="row">
-                        <div class="col">
+                        <div class="col-9">
                             <StorySectionComponent Section="@Section"/>
                         </div>
+                        <div class="col-3">
+                            <GamePanelComponent/>
+                        </div>
+                        
                     </div>
                 </div>
             }
@@ -34,17 +43,26 @@
 @code {
 
     [Parameter, Required]
+    public int SessionId { get; set; }
+    
+    [Parameter, Required]
     public int BookId { get; set; }
 
     [Parameter, Required]
     public int SectionNr { get; set; }
 
+    private bool _isAuthorizedForSession = false;
+
     public StorySection? Section { get; set; }
 
-    public List<AOutcome> Outcomes { get; set; } = new();
-
     protected override async Task OnParametersSetAsync() {
-        Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+        if (UserService.CurrentUser is not null) {
+            var session = await SessionService.CheckAndSetCurrentSession(SessionId, UserService.CurrentUser.Id);
+            _isAuthorizedForSession = session is not null;
+            if (_isAuthorizedForSession) {
+                Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+            }
+        }
     }
 
 }

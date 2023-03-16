@@ -1,0 +1,10 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Model.Entities.Sections.StorySections
+@using Model.Entities.Sessions
+<h3>GamePanelComponent</h3>
+
+@code {
+    
+    [Parameter, Required]
+    public Session Session { get; set; } = new();
+}

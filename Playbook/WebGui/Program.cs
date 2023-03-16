@@ -30,13 +30,15 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IStorySectionRepository, StorySectionRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<ISectionHistoryRepository, SectionHistoryRepository>();
+builder.Services.AddScoped<IPlayedBookRepository, PlayedBookRepository>();
 
+builder.Services.AddScoped<SessionService>();
 
 builder.Services.AddScoped<IThemeHandler, ThemeHandler>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IUserRoleClaimRepository, UserRoleClaimRepository>();
-
 
 builder.Services.AddMudServices();
 builder.Services.AddLogging();

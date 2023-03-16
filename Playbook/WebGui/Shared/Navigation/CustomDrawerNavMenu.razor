@@ -7,9 +7,9 @@
         <MudText Color="Color.Tertiary" Typo="Typo.body1">Home</MudText>
     </MudNavLink>
     @if (_logedIn) {
-        <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" IconColor="Color.Tertiary" Href="/books/1/sections/1">
-            <MudText Color="Color.Tertiary" Typo="Typo.body1">Sections</MudText>
-        </MudNavLink>
+        @* <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.LibraryBooks" IconColor="Color.Tertiary" Href="/books/1/sections/1"> *@
+        @*     <MudText Color="Color.Tertiary" Typo="Typo.body1">Sections</MudText> *@
+        @* </MudNavLink> *@
         <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Tertiary" OnClick="Logout">
             <MudText Color="Color.Tertiary" Typo="Typo.body1">Logout</MudText>
         </MudNavLink>

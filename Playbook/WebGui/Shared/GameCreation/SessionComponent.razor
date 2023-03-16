@@ -1,20 +1,29 @@
 ﻿@using Model.Entities.Sessions
-<MudCard Style="background-color:  rgb(18, 89, 161, 0.05);">
+@using WebGui.Services
+@inject NavigationManager NavManager
+@inject SessionService SessionService
+
+<MudCard Style="background-color:  rgb(18, 89, 161, 0.05);" Class="m-2">
     <MudCardHeader>
-        <MudText Typo="Typo.h5">@Session.Name - @Session.Hero.Name</MudText>
+        <MudText Typo="Typo.h5"><strong>@Session.Name</strong></MudText>
         <MudSpacer/>
-        <MudButton Color="Color.Tertiary" Variant="Variant.Filled">Weiter</MudButton>
+        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" OnClick="PlaySession">Weiter</MudButton>
     </MudCardHeader>
     <MudCardContent>
         @if (Session.BooksPlaying.Any()) {
-            <MudText Typo="Typo.h5">CurrentBook: @Session.BooksPlaying.First().Book.Title</MudText>
+            <MudPaper Width="100%" >
+                <MudList>
+                    <MudListItem Text="@Session.BooksPlaying.First().Book.Title" Avatar="@Icons.Material.Filled.MenuBook" IconColor="Color.Primary" />
+                    <MudListItem Text="@Session.Hero.Name" Avatar="@Icons.Material.Filled.Person4" IconColor="Color.Primary" />
+                </MudList>
+            </MudPaper>
         }
 
     </MudCardContent>
     <MudCardActions>
         <MudSpacer/>
         @if (Session.BooksPlaying.Any()) {
-            <MudText Typo="Typo.caption">@Session.BooksPlaying.First().LastTimePlayed</MudText>
+            <MudText Typo="Typo.caption" Class="p-2">Last Time Played: @Session.BooksPlaying.First().LastTimePlayed</MudText>
         }
     </MudCardActions>
 </MudCard>
@@ -23,5 +32,9 @@
 
     [Parameter]
     public Session Session { get; set; } = new();
+
+    public async Task PlaySession() {
+        await SessionService.StartPlaySession(Session.Id);
+    }
 
 }

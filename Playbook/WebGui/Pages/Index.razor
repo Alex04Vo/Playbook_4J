@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using WebGui.Services
 @inject UserService UserService
+@inject SessionService SessionService
 @inject NavigationManager NavManager
 
 <PageTitle>Home</PageTitle>
@@ -13,3 +14,9 @@
         <LandingPageComponent/>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    protected override void OnParametersSet() {
+        SessionService.ResetCurrentSession();
+    }
+}

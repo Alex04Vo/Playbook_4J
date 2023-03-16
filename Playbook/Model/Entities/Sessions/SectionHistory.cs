@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Model.Entities.Sections;
+using Model.Entities.Sections.StorySections;
 
 namespace Model.Entities.Sessions; 
 
@@ -15,7 +16,7 @@ public class SectionHistory {
 
     [Column("SECTION_ID")]
     public int SectionId { get; set; }
-    public ASection Section { get; set; }
+    public StorySection Section { get; set; }
 
     [Required, DataType(DataType.DateTime)]
     [Column("TIMESTAMP")]

@@ -13,5 +13,8 @@ public class Inventory {
     [Required, StringLength(100)]
     [Column("INVENTORY_STATE")]
     public EInventoryState InventoryState { get; set; } = EInventoryState.IN_ORDER;
-    
+
+    [NotMapped] 
+    public List<InventoryItem> Items { get; set; } = new();
+
 }

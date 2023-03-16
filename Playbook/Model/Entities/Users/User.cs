@@ -30,7 +30,7 @@ public class User {
 
     
     public User ClearSensitiveData() {
-        PasswordHash = null!;
+        // PasswordHash = null!;
         return this;
     }
 

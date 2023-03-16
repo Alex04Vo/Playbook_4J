@@ -1,6 +1,8 @@
 ﻿@using Model.Entities.Sections.StorySections
 @using System.ComponentModel.DataAnnotations
+@using WebGui.Services
 @inject NavigationManager NavManager
+@inject SessionService SessionService
 
 <MudCard>
     <MudCardHeader>
@@ -13,7 +15,7 @@
         <br/>
         @foreach (var outcome in Section.Outcomes) {
             <div>
-                <MudButton Color="Color.Primary" Variant="Variant.Outlined" Class="m-2 w-100" OnClick="() => NavToOutcome(outcome.Section.SectionNumber)">
+                <MudButton Color="Color.Primary" Variant="Variant.Outlined" Class="m-2 w-100" OnClick="() => NavToOutcome(outcome.Section)">
                     @outcome.Content - @outcome.Section.SectionNumber
                 </MudButton>
             </div>
@@ -26,7 +28,8 @@
     [Parameter, Required]
     public StorySection Section { get; set; } = new();
 
-    private void NavToOutcome(int sectioNumber) {
-        NavManager.NavigateTo($"/books/{Section.BookId}/sections/{sectioNumber}");
+    private async Task NavToOutcome(StorySection goalSection) {
+        await SessionService.SaveChoosenSection(Section.BookId, Section.Id, goalSection.Id);
+        NavManager.NavigateTo($"/s/{SessionService.CurrentSession!.Id}/books/{Section.BookId}/sections/{goalSection.SectionNumber}");
     }
 }

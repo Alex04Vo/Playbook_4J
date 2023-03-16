@@ -288,7 +288,7 @@ public class PlaybookContext : DbContext {
             .HasKey(i => new {i.InventoryId, i.ItemId});
         builder.Entity<InventoryItem>()
             .HasOne(i => i.Inventory)
-            .WithMany()
+            .WithMany(i=>i.Items)
             .HasForeignKey(i => i.InventoryId);
         builder.Entity<InventoryItem>()
             .HasOne(i => i.Item)
