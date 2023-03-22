@@ -1,0 +1,180 @@
+﻿@using Model.Entities.Sessions
+@using Model.Entities.Heroes.PlayerLevels
+@using Model.Entities.Abilities
+@using Domain.Repositories.Interfaces
+@using Microsoft.AspNetCore.Components
+@using Model.Entities.Books
+@using Model.Entities.Heroes
+@using Model.Entities.Heroes.Inventories
+@using WebGui.Services
+@using System.Linq.Expressions
+@inject UserService UserService
+@inject ISessionRepository SessionRepository
+@inject IStorySectionRepository StorySectionRepository
+@inject IAbilityRepository AbilityRepository
+@inject IBookRepository BookRepository
+@inject ILogger<SessionCreationDialog> Logger
+
+<MudDialog>
+    <DialogContent>
+        @if (NewSession is not null) {
+            <EditForm Model="@NewSession" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator/>
+                <MudText Typo="Typo.body1"  Class="mb-1"><strong>Session:</strong></MudText>
+                <MudTextField @bind-Value="NewSession.Name" Label="Name" Variant="Variant.Text" Class="mb-2" Required="true"></MudTextField>
+                <MudSelect T="Book" Label="Starting Book" @bind-Value="StartingBook" Text="@StartingBook.Title"
+                           Variant="Variant.Text" Class="mb-2">
+                    @foreach (var book in Books) {
+                        <MudSelectItem T="Book" Value="@book">@book.Title</MudSelectItem>
+                    }
+                </MudSelect>
+                <br/>
+                <MudDivider/>
+                <MudText Typo="Typo.body1" Class="mb-1"><strong>Hero:</strong></MudText>
+                <MudTextField @bind-Value="NewSession.Hero.Name" Label="Name" Variant="Variant.Text" Class="mb-2" Required="true"></MudTextField>
+                <MudSelect T="string" Label="Abilities - Select 6" HelperText="@AbilityAmount()" MultiSelection="true" 
+                           @bind-Value="MultiSelectAbilityValue" @bind-SelectedValues="ChoosenAbilitiesEnumerable" Class="mb-2">
+                    @foreach (var ability in Abilities)
+                    {
+                        <MudSelectItem T="string" Value="@ability.Type.ToString()">@ability.ToReadableType()</MudSelectItem>
+                    }
+                </MudSelect>
+                <br/>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-6">
+                            <MudTextField @bind-Value="NewSession.Hero.Endurance" Label="Endurance" Variant="Variant.Text" Class="mb-2" Disabled="true"/>
+                        </div>
+                        <div class="col-6">
+                            <MudTextField @bind-Value="NewSession.Hero.CombatSkill" Label="Combat Skill" Variant="Variant.Text" Class="mb-2" Disabled="true"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <MudTextField @bind-Value="NewSession.Hero.HeroOwnership.GoldCoins" Label="Gold Coins" Variant="Variant.Text" Class="mb-2" Disabled="true"/>
+                        </div>
+                        <div class="col-6">
+                            <MudTextField @bind-Value="NewSession.Hero.HeroOwnership.Rations" Label="Rations" Variant="Variant.Text" Class="mb-2" Disabled="true"/>
+                        </div>
+                    </div>
+                    
+                </div>
+                <MudDivider/>
+            </EditForm>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!String.IsNullOrWhiteSpace(_errorMsg)) {
+            <MudAlert Dense="true" Severity="Severity.Error">@_errorMsg</MudAlert>
+            <MudSpacer/>
+        }
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create Session</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    public List<Ability> Abilities { get; set; } = new();
+    public List<Book> Books { get; set; } = new();
+    
+    protected override async Task OnInitializedAsync() {
+        Abilities = await AbilityRepository.ReadAllAsync();
+        Books = await BookRepository.ReadAllAsync();
+        if (Books.Any()) {
+            StartingBook = Books.First();
+        }
+    }
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    async Task Submit() => await HandleCreation();
+    void Cancel() => MudDialog.Cancel();
+    
+    public Session? NewSession { get; set; } = new() {
+        Hero = new() {
+            HeroLevelValue = EPlayerLevel.INITIATE,
+            Endurance = 28,
+            CombatSkill = 17,
+            HeroOwnership = new() {
+                GoldCoins = 8,
+                Rations = 2
+            },
+            Inventory = new() {
+                InventoryState = EInventoryState.IN_ORDER,
+                Items = new() {
+                    new InventoryItem() {
+                        ItemId = 7
+                    },
+                    new InventoryItem() {
+                        ItemId = 12
+                    },
+                }
+            },
+            Abilities = new()
+        }
+    };
+    
+    bool _success = false;
+
+    private void OnValidSubmit(EditContext context) {
+        _success = true;
+        StateHasChanged();
+    }
+
+    public Book StartingBook { get; set; } = new() {
+        Title = ""
+    };
+    
+    public string MultiSelectAbilityValue { get; set; } = "";
+    public IEnumerable<string> ChoosenAbilitiesEnumerable { get; set; } = new List<string>();
+
+    string AbilityAmount() {
+        return ChoosenAbilitiesEnumerable.Count() <= 6 ? $"{ChoosenAbilitiesEnumerable.Count()} / 6 Abilities selected" : "Please select a maximum of 6 Abilities!";
+    }
+    
+    string _errorMsg = "";
+    
+    public async Task HandleCreation() {
+        if (NewSession is not null) {
+            _errorMsg = "";
+            if (String.IsNullOrWhiteSpace(NewSession.Name) || String.IsNullOrWhiteSpace(NewSession.Hero.Name)) {
+                _errorMsg = "Session or Hero has no Name!";
+                return;
+            }
+            if (ChoosenAbilitiesEnumerable.Count() != 6) {
+                _errorMsg = "Choose 6 Abilities!";
+                return;
+            }
+
+            if (UserService.CurrentUser is not null) {
+                NewSession.UserId = UserService.CurrentUser.Id;
+                NewSession.CreatedAt = DateTime.Now;
+                NewSession.BooksPlaying = new List<PlayedBook>() {
+                    new PlayedBook() {
+                        BookId = StartingBook.Id,
+                        IsCompleted = false,
+                        LastTimePlayed = DateTime.Now,
+                        Sections = new List<SectionHistory>() {
+                            new SectionHistory() {
+                                BookId = StartingBook.Id,
+                                SectionId = StorySectionRepository.GetFirstStorySectionId(StartingBook.Id)
+                            }
+                        }
+                    }
+                };
+                
+                ChoosenAbilitiesEnumerable.ToList().ForEach(s=>NewSession.Hero.Abilities.Add(new HeroAbility() {
+                    AbilityType = (EAbilityType)Enum.Parse(typeof(EAbilityType), s, true)
+                }));
+
+                var session = await SessionRepository.CreateAsync(NewSession);
+
+            }
+            
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        
+    }
+
+}
+

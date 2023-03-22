@@ -3,13 +3,14 @@
 @using Domain.Repositories.Interfaces
 @inject UserService UserService
 @inject ISessionRepository SessionRepository
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudCard>
         <MudCardHeader>
             <MudText Typo="Typo.h4" Color="Color.Primary">@(Random.Shared.Next(0,100) < 75 ? "Welcome back, " : "Hello, ") @UserService.CurrentUser!.UserName !</MudText>
             <MudSpacer/>
-            <MudButton Color="Color.Primary" Variant="Variant.Filled">Create new Session</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenDialog">Create new Session</MudButton>
         </MudCardHeader>
         <MudCardContent>
             @foreach (var session in Sessions) {
@@ -28,7 +29,18 @@
         @if (UserService.CurrentUser is not null) {
             Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
         }
-        
+    }
+    
+    private async Task OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<SessionCreationDialog>("Create new Session", options);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled && UserService.CurrentUser is not null) {
+            Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+            StateHasChanged();
+        }
     }
 
 }

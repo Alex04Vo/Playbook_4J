@@ -16,4 +16,8 @@ public class StorySectionRepository : ARepository<StorySection>, IStorySectionRe
             .Include(s=>s.Outcomes)
             .ThenInclude(o=>o.Section)
             .FirstOrDefaultAsync();
+    
+    public int GetFirstStorySectionId(int bookId) => 
+        Table.SingleOrDefault(s => s.BookId == bookId && s.SectionNumber == 1)!.Id;
+    
 }

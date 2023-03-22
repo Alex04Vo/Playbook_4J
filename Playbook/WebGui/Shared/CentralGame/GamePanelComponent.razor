@@ -1,10 +1,61 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using Model.Entities.Heroes
 @using Model.Entities.Sections.StorySections
 @using Model.Entities.Sessions
-<h3>GamePanelComponent</h3>
+@inject ILogger<GamePanelComponent> Logger
+<MudCard>
+    <MudCardHeader>
+        <MudText Color="Color.Primary" Typo="Typo.h5">@Hero.Name</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <table class="table table-borderless">
+            <tbody>
+            <tr>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1">Endurance:</MudText>
+                </td>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.Endurance</strong></MudText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1">Combat-Skill:</MudText>
+                </td>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.CombatSkill</strong></MudText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1">Gold:</MudText>
+                </td>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.HeroOwnership.GoldCoins</strong></MudText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1">Rations:</MudText>
+                </td>
+                <td>
+                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.HeroOwnership.Rations</strong></MudText>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <MudText Color="Color.Primary" Typo="Typo.body1"><strong>Abilities:</strong></MudText>
+        <ul>
+            @foreach (var ability in Hero.Abilities) {
+                <li><MudText Color="Color.Primary" Typo="Typo.body2">@ability.Ability.ToReadableType()</MudText></li>
+            }
+        </ul>
+    </MudCardContent>
+</MudCard>
 
 @code {
-    
+
     [Parameter, Required]
-    public Session Session { get; set; } = new();
+    public Hero Hero { get; set; } = new();
+
 }

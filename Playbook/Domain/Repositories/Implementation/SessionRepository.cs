@@ -38,6 +38,7 @@ public class SessionRepository : ARepository<Session>, ISessionRepository {
         await Table.Where(s => s.Id == sessionId)
             .Include(s => s.Hero)
             .Include(s=>s.Hero.Abilities)
+            .ThenInclude(a=>a.Ability)
             .Include(s=>s.Hero.HeroOwnership)
             .Include(s=>s.Hero.Inventory)
             .ThenInclude(i=>i.Items)

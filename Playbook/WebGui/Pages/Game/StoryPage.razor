@@ -4,30 +4,28 @@
 @using Domain.Repositories.Interfaces
 @using System.ComponentModel.DataAnnotations
 @using Model.Entities.Outcomes
+@using Model.Entities.Outcomes.Models
 @using Model.Entities.Sessions
 @using WebGui.Services
+@using System.Collections.Specialized
 @inject UserService UserService
 @inject SessionService SessionService
 @inject IStorySectionRepository StorySectionRepository
 @inject ISessionRepository SessionRepository
 
+@if (Section is not null) {
+    <PageTitle>@Section.Book.Title - @Section.SectionNumber</PageTitle>  
+}
+else {
+    <PageTitle>Game</PageTitle>
+}
+ 
 
-<PageTitle>MNAA - Auftritt</PageTitle>
 <AuthorizeView>
     <Authorized>
         @if (_isAuthorizedForSession) {
             @if (Section is not null) {
-                <div class="container">
-                    <div class="row">
-                        <div class="col-9">
-                            <StorySectionComponent Section="@Section"/>
-                        </div>
-                        <div class="col-3">
-                            <GamePanelComponent/>
-                        </div>
-                        
-                    </div>
-                </div>
+                <StorySectionComponent Section="@Section" Outcomes="@Outcomes"/>
             }
         }
         else {
@@ -54,6 +52,7 @@
     private bool _isAuthorizedForSession = false;
 
     public StorySection? Section { get; set; }
+    public List<DisplayOutcome> Outcomes { get; set; } = new();
 
     protected override async Task OnParametersSetAsync() {
         if (UserService.CurrentUser is not null) {
@@ -61,6 +60,11 @@
             _isAuthorizedForSession = session is not null;
             if (_isAuthorizedForSession) {
                 Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+                Outcomes = new List<DisplayOutcome>();
+                var random = new Random().Next(0, 10);
+                if (SessionService.CurrentSession is not null && Section is not null && Section.Outcomes.Any()) {
+                    Section.Outcomes.ForEach(outcome => Outcomes.Add(new DisplayOutcome(outcome, SessionService.CurrentSession.Hero, random)));
+                }
             }
         }
     }
