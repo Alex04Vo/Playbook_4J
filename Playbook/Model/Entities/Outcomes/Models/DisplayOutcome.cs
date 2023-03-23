@@ -27,7 +27,7 @@ public class DisplayOutcome {
                 break;
             case "GoldOutcome" : 
                 var goldOutcome = (GoldOutcome)this.Outcome;
-                return hero.HeroOwnership.GoldCoins > goldOutcome.Amount;
+                return hero.HeroOwnership.GoldCoins > Math.Abs(goldOutcome.Amount);
                 break;
             case "ItemOutcome" : 
                 var itemOutcome = (ItemOutcome)this.Outcome;

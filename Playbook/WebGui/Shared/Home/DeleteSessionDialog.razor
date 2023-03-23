@@ -1,0 +1,19 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body1">Do you realy want to Delete this Session?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="Submit" ButtonType="ButtonType.Button" Variant="Variant.Outlined" 
+                   Size="Size.Small" Color="Color.Error">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

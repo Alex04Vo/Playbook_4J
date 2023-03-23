@@ -4,52 +4,70 @@
 @using Model.Entities.Sessions
 @inject ILogger<GamePanelComponent> Logger
 <MudCard>
-    <MudCardHeader>
-        <MudText Color="Color.Primary" Typo="Typo.h5">@Hero.Name</MudText>
-    </MudCardHeader>
     <MudCardContent>
-        <table class="table table-borderless">
-            <tbody>
-            <tr>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1">Endurance:</MudText>
-                </td>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.Endurance</strong></MudText>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1">Combat-Skill:</MudText>
-                </td>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.CombatSkill</strong></MudText>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1">Gold:</MudText>
-                </td>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.HeroOwnership.GoldCoins</strong></MudText>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1">Rations:</MudText>
-                </td>
-                <td>
-                    <MudText Color="Color.Primary" Typo="Typo.body1"><strong>@Hero.HeroOwnership.Rations</strong></MudText>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <MudText Color="Color.Primary" Typo="Typo.body1"><strong>Abilities:</strong></MudText>
-        <ul>
-            @foreach (var ability in Hero.Abilities) {
-                <li><MudText Color="Color.Primary" Typo="Typo.body2">@ability.Ability.ToReadableType()</MudText></li>
-            }
-        </ul>
+        <MudText Color="Color.Primary" Typo="Typo.h5" Class="mb-2">
+            <strong>@Hero.Name</strong>
+        </MudText>
+        <MudDivider/>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xxl-6 col-xl-12">
+                    <MudList Dense="true">
+                        <MudListItem Avatar="@Icons.Material.Filled.HealthAndSafety">
+                            <MudText Typo="Typo.body1">
+                                <div>Endurance </div><strong>@Hero.Endurance</strong>
+                            </MudText>
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Shield">
+                            <MudText Typo="Typo.body1">
+                                <div>Combat Skill </div><strong>@Hero.CombatSkill</strong>
+                            </MudText>
+                        </MudListItem>
+                    </MudList>
+                </div>
+                <div class="col-xxl-6 col-xl-12">
+                    <MudList Dense="true">
+                        <MudListItem Avatar="@Icons.Material.Filled.AttachMoney">
+                            <MudText Typo="Typo.body1">
+                                <div>Gold Coins </div><strong>@Hero.HeroOwnership.GoldCoins</strong>
+                            </MudText>
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Fastfood">
+                            <MudText Typo="Typo.body1">
+                                <div>Rations </div><strong>@Hero.HeroOwnership.Rations</strong>
+                            </MudText>
+                        </MudListItem>
+                    </MudList>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xxl-6 col-xl-12">
+                    <MudText Color="Color.Primary" Typo="Typo.body1">
+                        <strong>Abilities:</strong>
+                    </MudText>
+                    <MudList Clickable="false" Dense="true" DisableGutters="true">
+                        @foreach (var ability in Hero.Abilities) {
+                            <MudListItem Icon="@Icons.Material.Filled.ChevronRight" IconColor="Color.Secondary">
+                                <strong>@ability.Ability.ToReadableType()</strong>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </div>
+                <div class="col-xxl-6 col-xl-12">
+                    <MudText Color="Color.Primary" Typo="Typo.body1">
+                        <strong>Items:</strong>
+                    </MudText>
+                    <MudList Clickable="false" Dense="true" DisableGutters="true">
+                        @foreach (var item in Hero.Inventory.Items) {
+                            <MudListItem Icon="@Icons.Material.Filled.ChevronRight" IconColor="Color.Secondary">
+                                <strong>@item.Item.Name</strong>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </div>
+
+            </div>
+        </div>
     </MudCardContent>
 </MudCard>
 

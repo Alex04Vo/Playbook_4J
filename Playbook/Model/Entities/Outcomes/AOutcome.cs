@@ -17,8 +17,8 @@ public abstract class AOutcome {
     public StorySection RootSection { get; set; }
     
     [Column("SECTION_ID")]
-    public int SectionId { get; set; }
-    public StorySection Section { get; set; }
+    public int? SectionId { get; set; }
+    public StorySection? Section { get; set; }
 
     [Required, DataType(DataType.Text)]
     [Column("CONTENT")]

@@ -33,6 +33,7 @@ builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ISectionHistoryRepository, SectionHistoryRepository>();
 builder.Services.AddScoped<IPlayedBookRepository, PlayedBookRepository>();
 builder.Services.AddScoped<IAbilityRepository, AbilityRepository>();
+builder.Services.AddScoped<IHeroRepository, HeroRepository>();
 
 builder.Services.AddScoped<SessionService>();
 

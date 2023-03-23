@@ -18,13 +18,13 @@
 <MudLayout>
     <CustomAppBar/>
     <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"
-                   OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
+               OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
         <CustomDrawerNavMenu/>
-        </MudDrawer>
+    </MudDrawer>
     <MudMainContent>
-        <MudContainer Class="py-4" MaxWidth="MaxWidth.ExtraLarge">
+        <div class="py-4 mx-5">
             @Body
-        </MudContainer>
+        </div>
     </MudMainContent>
 </MudLayout>
 
@@ -45,15 +45,16 @@
     };
 
     bool _drawerOpen = false;
+
     void DrawerToggle() {
         _drawerOpen = !_drawerOpen;
     }
-    
+
     private async Task Logout() {
         await UserService.LogoutAsync();
         NavManager.NavigateTo($"/");
     }
-    
+
     private void Login() {
         NavManager.NavigateTo($"/auth");
     }

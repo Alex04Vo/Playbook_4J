@@ -689,7 +689,7 @@ VALUES (42, 0, 6);
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID, SECTION_ID, CONTENT)
 VALUES (43, 23, 316, 'If the number is 7 or 8 you are stuck. The mud engulfs you up to your armpits. Your horse gives one last despairing scream as its muzzle disappears into the bubbling mud. ');
 INSERT INTO RANDOM_OUTCOMES (OUTCOME_ID, MIN, MAX)
-VALUES (43, 7, 8);
+VALUES (43, 7, 9);
 
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID, SECTION_ID, CONTENT)
 VALUES (44, 23, -1, 'the foul-smelling bog sucks you under and claims another victim. Your life and your mission end here.');

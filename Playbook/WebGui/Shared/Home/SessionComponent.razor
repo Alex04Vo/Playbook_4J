@@ -1,13 +1,18 @@
 ﻿@using Model.Entities.Sessions
 @using WebGui.Services
+@using Domain.Repositories.Implementation
+@using Domain.Repositories.Interfaces
 @inject NavigationManager NavManager
 @inject SessionService SessionService
+@inject ISessionRepository SessionRepository
+@inject IDialogService DialogService
 
 <MudCard Style="background-color:  rgb(18, 89, 161, 0.05);" Class="m-3">
     <MudCardHeader>
         <MudText Typo="Typo.h5"><strong>@Session.Name</strong></MudText>
         <MudSpacer/>
-        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" OnClick="PlaySession">Weiter</MudButton>
+        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" OnClick="PlaySession" Class="mx-2">Weiter</MudButton>
+        <MudIconButton Color="Color.Error" Variant="Variant.Filled" OnClick="DeleteSession" Icon="@Icons.Material.Filled.Delete"/>
     </MudCardHeader>
     <MudCardContent>
         @if (Session.BooksPlaying.Any()) {
@@ -36,5 +41,19 @@
     public async Task PlaySession() {
         await SessionService.StartPlaySession(Session.Id);
     }
+    
+    private async Task DeleteSession()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<DeleteSessionDialog>("Delete Session", options);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            await SessionRepository.DeleteAsync(Session);
+            NavManager.NavigateTo("/", true);
+            StateHasChanged();
+        }
+    }
+
 
 }
