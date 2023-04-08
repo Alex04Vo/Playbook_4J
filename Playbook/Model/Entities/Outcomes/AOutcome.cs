@@ -23,4 +23,10 @@ public abstract class AOutcome {
     [Required, DataType(DataType.Text)]
     [Column("CONTENT")]
     public string Content { get; set; }
+
+    public string GetFullText() {
+        if (Section is null) return Content;
+        
+        return Content + " " + Section.SectionNumber.ToString();
+    }
 }

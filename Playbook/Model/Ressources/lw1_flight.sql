@@ -6254,6 +6254,8 @@ VALUES (293, 289, 6);
 -- OUTCOMES
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID,  SECTION_ID, CONTENT)
 VALUES (479, 293, 142, 'Turn to');
+INSERT INTO DEFAULT_OUTCOMES (OUTCOME_ID)
+VALUES (479);
 
 -- ---------------------------------------------------------------------------- --
 --  STORY_SECTION: 290
@@ -6276,7 +6278,7 @@ VALUES (96);
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID,  SECTION_ID, CONTENT)
 VALUES (480, 294, 143, 'Turn to');
 INSERT INTO DEFAULT_OUTCOMES (OUTCOME_ID)
-VALUES (479);
+VALUES (480);
 
 -- ---------------------------------------------------------------------------- --
 --  STORY_SECTION: 291

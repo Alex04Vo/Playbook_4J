@@ -135,44 +135,51 @@
     string _errorMsg = "";
     
     public async Task HandleCreation() {
-        if (NewSession is not null) {
-            _errorMsg = "";
-            if (String.IsNullOrWhiteSpace(NewSession.Name) || String.IsNullOrWhiteSpace(NewSession.Hero.Name)) {
-                _errorMsg = "Session or Hero has no Name!";
-                return;
-            }
-            if (ChoosenAbilitiesEnumerable.Count() != 6) {
-                _errorMsg = "Choose 6 Abilities!";
-                return;
-            }
+        try {
+            if (NewSession is not null) {
+                _errorMsg = "";
+                if (String.IsNullOrWhiteSpace(NewSession.Name) || String.IsNullOrWhiteSpace(NewSession.Hero.Name)) {
+                    _errorMsg = "Session or Hero has no Name!";
+                    return;
+                }
+                if (ChoosenAbilitiesEnumerable.Count() != 6) {
+                    _errorMsg = "Choose 6 Abilities!";
+                    return;
+                }
 
-            if (UserService.CurrentUser is not null) {
-                NewSession.UserId = UserService.CurrentUser.Id;
-                NewSession.CreatedAt = DateTime.Now;
-                NewSession.BooksPlaying = new List<PlayedBook>() {
-                    new PlayedBook() {
-                        BookId = StartingBook.Id,
-                        IsCompleted = false,
-                        LastTimePlayed = DateTime.Now,
-                        Sections = new List<SectionHistory>() {
-                            new SectionHistory() {
-                                BookId = StartingBook.Id,
-                                SectionId = StorySectionRepository.GetFirstStorySectionId(StartingBook.Id)
+                if (UserService.CurrentUser is not null) {
+                    NewSession.UserId = UserService.CurrentUser.Id;
+                    NewSession.CreatedAt = DateTime.Now;
+                    NewSession.BooksPlaying = new List<PlayedBook>() {
+                        new PlayedBook() {
+                            BookId = StartingBook.Id,
+                            IsCompleted = false,
+                            LastTimePlayed = DateTime.Now,
+                            Sections = new List<SectionHistory>() {
+                                new SectionHistory() {
+                                    BookId = StartingBook.Id,
+                                    SectionId = StorySectionRepository.GetFirstStorySectionId(StartingBook.Id)
+                                }
                             }
                         }
-                    }
-                };
+                    };
                 
-                ChoosenAbilitiesEnumerable.ToList().ForEach(s=>NewSession.Hero.Abilities.Add(new HeroAbility() {
-                    AbilityType = (EAbilityType)Enum.Parse(typeof(EAbilityType), s, true)
-                }));
+                    ChoosenAbilitiesEnumerable.ToList().ForEach(s=>NewSession.Hero.Abilities.Add(new HeroAbility() {
+                        AbilityType = (EAbilityType)Enum.Parse(typeof(EAbilityType), s, true)
+                    }));
 
-                var session = await SessionRepository.CreateAsync(NewSession);
+                    var session = await SessionRepository.CreateAsync(NewSession);
 
-            }
+                }
             
-            MudDialog.Close(DialogResult.Ok(true));
+                MudDialog.Close(DialogResult.Ok(true));
+            }
         }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
+        }
+
         
     }
 

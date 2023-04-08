@@ -28,6 +28,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IRuleSectionRepository, RuleSectionRepository>();
 builder.Services.AddScoped<IStorySectionRepository, StorySectionRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ISectionHistoryRepository, SectionHistoryRepository>();

@@ -1,9 +1,0 @@
-﻿@using Model.Entities.Books
-@if (Book is not null) {
-    <div class="text-muted">@Book.Title</div>
-}
-
-@code {
-    [Parameter]
-    public Book? Book { get; set; }
-}

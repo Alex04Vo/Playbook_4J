@@ -1,0 +1,27 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Model.Entities.Sections.StorySections
+
+@if (Section is not null) {
+    <MudPaper Elevation="1" Class="m-2 p-2">
+        <MudText Typo="Typo.h6">Section - Nr. @Section.SectionNumber</MudText>
+        <br/>
+        <MudText Typo="Typo.body2">@Section.Content</MudText>
+        <br/>
+        @if(Section.Outcomes.Any()) {
+            <MudPaper Width="100%">
+                <MudList Clickable="false" Dense="true">
+                    @foreach (var outcome in Section.Outcomes) {
+                        <MudListItem Text="@outcome.GetFullText()" Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight"/>
+                    }
+                </MudList>
+            </MudPaper>
+        }
+    </MudPaper>
+}
+
+@code {
+
+    [Parameter, Required]
+    public StorySection? Section { get; set; } = new();
+
+}

@@ -1,21 +1,33 @@
 ﻿@using WebGui.Services
 @using Model.Entities.Sessions
 @using Domain.Repositories.Interfaces
+@using Model.Entities.Books
+@using Domain.Repositories.Implementation
 @inject UserService UserService
 @inject ISessionRepository SessionRepository
+@inject IBookRepository BookRepository
 @inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Large">
     <MudCard>
-        <MudCardHeader>
-            <MudText Typo="Typo.h4" Color="Color.Primary">@(Random.Shared.Next(0,100) < 75 ? "Welcome back, " : "Hello, ") @UserService.CurrentUser!.UserName !</MudText>
+        <MudCardHeader Class="align-items-lg-start">
+            <div>
+                <MudText Typo="Typo.h3" Color="Color.Primary">Playbook</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Primary">@(Random.Shared.Next(0, 100) < 75 ? "Welcome back, " : "Hello, ") @UserService.CurrentUser!.UserName !</MudText>
+            </div>
             <MudSpacer/>
             <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="OpenDialog">Create new Session</MudButton>
         </MudCardHeader>
         <MudCardContent>
-            @foreach (var session in Sessions) {
-                <SessionComponent Session="session"/>
+            @if (Sessions.Any()) {
+                foreach (var session in Sessions) {
+                    <SessionComponent Session="session"/>
+                }
+                <br/>
+                <MudDivider/>
+                <br/>
             }
+            <BookOverviewComponent Books="@Books" ShowHeading="Sessions.Any()"/>
         </MudCardContent>
     </MudCard>
 </MudContainer>
@@ -24,10 +36,18 @@
 @code {
 
     public List<Session> Sessions { get; set; } = new();
+    public List<Book> Books { get; set; } = new();
     
     protected override async Task OnParametersSetAsync() {
-        @if (UserService.CurrentUser is not null) {
-            Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+        try {
+            @if (UserService.CurrentUser is not null) {
+                Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+                Books = await BookRepository.ReadAllWithTitlePageAsync();
+            }
+        }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
         }
     }
     

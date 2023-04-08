@@ -1,27 +1,30 @@
-﻿<MudContainer MaxWidth="MaxWidth.Large">
+﻿@using Domain.Repositories.Interfaces
+@using Model.Entities.Books
+@using Model.Entities.Sections.RuleSections
+
+
+<MudContainer MaxWidth="MaxWidth.Large">
     <MudCard>
         <MudCardHeader>
             <MudText Typo="Typo.h3" Color="Color.Primary">Playbook</MudText>
         </MudCardHeader>
         <MudCardContent>
-            <MudText Typo="Typo.body1" Align="Align.Center">
-                Joe Dever has most generously offered to allow some of his books to be published on
-                the internet thereafter to be downloaded free-of-charge. Rob Adams, Paul Bonner, Gary Chalk,
-                Melvyn Grant, Richard Hook, Peter Andrew Jones, Cyril Julien, Peter Lyon, Peter Parr, Graham Round,
-                and Brian Williams have also generously offered similar permission for their contributions to the
-                world of Magnamund.
-            </MudText>
+            <MudPaper Class="p-3">
+                <MudText Typo="Typo.body1" Align="Align.Center">
+                    Joe Dever has most generously offered to allow some of his books to be published on
+                    the internet thereafter to be downloaded free-of-charge. Rob Adams, Paul Bonner, Gary Chalk,
+                    Melvyn Grant, Richard Hook, Peter Andrew Jones, Cyril Julien, Peter Lyon, Peter Parr, Graham Round,
+                    and Brian Williams have also generously offered similar permission for their contributions to the
+                    world of Magnamund.
+                </MudText>
+                <br/>
+                <MudText Typo="Typo.body1" Align="Align.Center">
+                    The Playbook is a school project, which has the aim of publishing these works and tries to create an amazing
+                    playing expierience with a digital assistance of notation and calculation.
+                </MudText>
+            </MudPaper>
             <br/>
-            <MudText Typo="Typo.body1" Align="Align.Center">
-                The Playbook is a school project, which has the aim of publishing these works and tries to create an amazing
-                playing expierience with a digital assistance of notation and calculation.
-            </MudText>
-            <br/>
-            <MudContainer MaxWidth="MaxWidth.Medium">
-                <div class="justify-content-center">
-                    <MudButton Variant="Variant.Filled" FullWidth="true" Color="Color.Primary" Href="/auth">Login Now!</MudButton>
-                </div>
-            </MudContainer>
+            <BookOverviewComponent/>
         </MudCardContent>
     </MudCard>
 </MudContainer>
