@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Model.Entities.Events;
 using Model.Entities.Outcomes;
 using Model.Entities.Regions;
 
@@ -18,4 +19,7 @@ public class StorySection : ASection {
 
     [NotMapped]
     public List<AOutcome> Outcomes { get; set; } = new();
+    
+    [NotMapped]
+    public List<AEvent> Events { get; set; } = new();
 }

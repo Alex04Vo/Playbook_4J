@@ -8,10 +8,12 @@
 @using Model.Entities.Sessions
 @using WebGui.Services
 @using System.Collections.Specialized
+@using Model.Entities.Events
 @inject UserService UserService
 @inject SessionService SessionService
 @inject IStorySectionRepository StorySectionRepository
 @inject ISessionRepository SessionRepository
+@inject IEventRepository EventRepository
 
 @if (Section is not null) {
     <PageTitle>@Section.Book.Title - @Section.SectionNumber</PageTitle>  
@@ -25,7 +27,7 @@ else {
     <Authorized>
         @if (_isAuthorizedForSession) {
             @if (Section is not null) {
-                <StorySectionComponent Section="@Section" Outcomes="@Outcomes"/>
+                <StorySectionComponent Section="@Section" Outcomes="@Outcomes" Events="@Events"/>
             }
         }
         else {
@@ -53,20 +55,31 @@ else {
 
     public StorySection? Section { get; set; }
     public List<DisplayOutcome> Outcomes { get; set; } = new();
+    public List<AEvent> Events { get; set; } = new();
 
     protected override async Task OnParametersSetAsync() {
-        if (UserService.CurrentUser is not null) {
-            var session = await SessionService.CheckAndSetCurrentSession(SessionId, UserService.CurrentUser.Id);
-            _isAuthorizedForSession = session is not null;
-            if (_isAuthorizedForSession) {
-                Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
-                Outcomes = new List<DisplayOutcome>();
-                var random = new Random().Next(0, 10);
-                if (SessionService.CurrentSession is not null && Section is not null && Section.Outcomes.Any()) {
-                    Section.Outcomes.ForEach(outcome => Outcomes.Add(new DisplayOutcome(outcome, SessionService.CurrentSession.Hero, random)));
+        try {
+            if (UserService.CurrentUser is not null) {
+                var session = await SessionService.CheckAndSetCurrentSession(SessionId, UserService.CurrentUser.Id);
+                _isAuthorizedForSession = session is not null;
+                if (_isAuthorizedForSession) {
+                    Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+                    Outcomes = new List<DisplayOutcome>();
+                    Events = new List<AEvent>();
+                    if (Section is not null) {
+                        Events = await EventRepository.GetEventsOfSectionAsync(Section.Id);
+                        
+                        var random = new Random().Next(0, 10);
+                        if (SessionService.CurrentSession is not null && Section is not null && Section.Outcomes.Any()) {
+                            Section.Outcomes.ForEach(outcome => Outcomes.Add(new DisplayOutcome(outcome, SessionService.CurrentSession.Hero, random)));
+                        }
+                    }
                 }
             }
         }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
+        }
     }
-
 }

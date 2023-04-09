@@ -1,13 +1,16 @@
 ﻿@using Model.Entities.Sections.StorySections
 @using System.ComponentModel.DataAnnotations
 @using Domain.Repositories.Interfaces
+@using Model.Entities.Events
 @using Model.Entities.Heroes
 @using Model.Entities.Outcomes.Models
 @using Model.Entities.Outcomes.SubOutcomes
 @using WebGui.Services
+@using WebGui.Shared.CentralGame.EventHandling
 @inject NavigationManager NavManager
 @inject SessionService SessionService
 @inject IHeroRepository HeroRepository
+@inject IDialogService DialogService
 
 @if (SessionService.CurrentSession is not null) {
     <div class="container-fluid">
@@ -22,6 +25,14 @@
                         <br/>
                         <MudDivider/>
                         <br/>
+                        @if (Events.Any()) {
+                            <div>
+                                <MudButton Color="Color.Tertiary" Variant="Variant.Filled"
+                                           Class="m-2 w-100" OnClick="HandleEvents">
+                                    Show Events!
+                                </MudButton>
+                            </div>
+                        }
                         @if (Outcomes.Any()) {
                             @if (Outcomes.Any(o => o.Type == "RandomOutcome")) {
                                 <MudAlert Severity="Severity.Info" ContentAlignment="HorizontalAlignment.Center" Class="mx-4">Random Number: <strong>@Outcomes.First().RandomNumber</strong></MudAlert>
@@ -30,7 +41,7 @@
                             @foreach (var outcome in Outcomes) {
                                 @if (outcome.Outcome.Section is not null) {
                                     <div>
-                                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(!outcome.IsChooseable)"
+                                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(!outcome.IsChooseable || Events.Any())"
                                                    Class="m-2 w-100" OnClick="() => NavToOutcome(outcome)">
                                             @outcome.Outcome.Content - @outcome.Outcome.Section.SectionNumber
                                         </MudButton>
@@ -54,6 +65,9 @@
             </div>
         </div>
     </div>
+    @foreach (var e  in Events) {
+        @e.GetType().Name
+    }
 }
 
 @code {
@@ -63,6 +77,11 @@
 
     [Parameter, Required]
     public List<DisplayOutcome> Outcomes { get; set; } = new();
+    
+    [Parameter, Required]
+    public List<AEvent> Events { get; set; } = new();
+
+    private bool _openEventsExisting = false;
 
     private async Task NavToOutcome(DisplayOutcome dOutcome) {
         if (SessionService.CurrentSession is not null) {
@@ -76,4 +95,19 @@
         }
     }
 
+    private async Task HandleEvents() {
+        if (SessionService.CurrentSession is not null) {
+            
+            var parameters = new DialogParameters();
+            parameters.Add("Events", Events);
+            var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Medium, FullWidth = true};
+            var dialog = DialogService.Show<EventHandlerDialog>($"Events - Section {Section.SectionNumber}", parameters, options);
+
+            var result = await dialog.Result;
+            if (!result.Cancelled) {
+                Events = new();
+                StateHasChanged();
+            }
+        }
+    }
 }

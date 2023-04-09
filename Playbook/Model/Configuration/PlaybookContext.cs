@@ -201,7 +201,7 @@ public class PlaybookContext : DbContext {
         
         //AEvent - EVENTS_BT
         builder.Entity<AEvent>().HasOne(e => e.Section)
-            .WithMany()
+            .WithMany(s=>s.Events)
             .HasForeignKey(e => e.SectionId);
         
         //AItemEvent - ITEM_EVENTS_BT

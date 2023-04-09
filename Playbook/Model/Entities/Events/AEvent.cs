@@ -17,4 +17,6 @@ public abstract class AEvent {
     [Required]
     [Column("RANKING")]
     public int Ranking { get; set; }
+
+    public abstract string GetReadableType();
 }

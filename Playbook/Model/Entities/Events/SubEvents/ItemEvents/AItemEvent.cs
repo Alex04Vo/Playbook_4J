@@ -9,4 +9,8 @@ public class AItemEvent : AEvent {
     [Column("ITEM_ID")]
     public int ItemId { get; set; }
     public AItem Item { get; set; }
+    
+    public override string GetReadableType() {
+        return this.GetType().Name;
+    }
 }

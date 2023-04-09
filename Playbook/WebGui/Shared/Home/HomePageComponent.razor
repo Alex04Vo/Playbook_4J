@@ -20,8 +20,21 @@
         </MudCardHeader>
         <MudCardContent>
             @if (Sessions.Any()) {
-                foreach (var session in Sessions) {
-                    <SessionComponent Session="session"/>
+                @if (Sessions.Count == 1) {
+                    @foreach (var session in Sessions) {
+                        <SessionComponent Session="session"/>
+                    }
+                }
+                else {
+                    <div class="container-fluid">
+                        <div class="row">
+                            @foreach (var session in Sessions) {
+                                <div class="col-6">
+                                    <SessionComponent Session="session"/>
+                                </div>
+                            }
+                        </div>
+                    </div>
                 }
                 <br/>
                 <MudDivider/>
@@ -37,11 +50,11 @@
 
     public List<Session> Sessions { get; set; } = new();
     public List<Book> Books { get; set; } = new();
-    
+
     protected override async Task OnParametersSetAsync() {
         try {
             @if (UserService.CurrentUser is not null) {
-                Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+                Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id);
                 Books = await BookRepository.ReadAllWithTitlePageAsync();
             }
         }
@@ -50,15 +63,14 @@
             throw;
         }
     }
-    
-    private async Task OpenDialog()
-    {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+    private async Task OpenDialog() {
+        var options = new DialogOptions {CloseOnEscapeKey = true};
         var dialog = DialogService.Show<SessionCreationDialog>("Create new Session", options);
 
         var result = await dialog.Result;
         if (!result.Cancelled && UserService.CurrentUser is not null) {
-            Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id); 
+            Sessions = await SessionRepository.ReadSessionsFromUserForOverview(UserService.CurrentUser.Id);
             StateHasChanged();
         }
     }

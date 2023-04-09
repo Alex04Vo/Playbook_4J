@@ -15,6 +15,7 @@ public class StorySectionRepository : ARepository<StorySection>, IStorySectionRe
             .Include(s=>s.Book)
             .Include(s=>s.Outcomes)
             .ThenInclude(o=>o.Section)
+            .Include(s=>s.Events)
             .FirstOrDefaultAsync();
     
     public int GetFirstStorySectionId(int bookId) => 
