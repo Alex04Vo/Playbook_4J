@@ -61,7 +61,7 @@
                         Snackbar.Add($"Combat Skill changed by {combatSkillEventEvent.Amount}", Severity.Info);
                         break;
                     case "CombatSkillTempChangeEvent":
-    //TODO
+                        //TODO
                         break;
                     case "EnduranceEvent":
                         var enduranceEvent = (EnduranceEvent) e;
@@ -80,17 +80,16 @@
                         break;
                     case "RationAmountEvent":
                         var rationAmountEvent = (RationAmountEvent) e;
-                        if (SessionService.CurrentSession.Hero.HeroOwnership.Rations >= Math.Abs(rationAmountEvent.Amount)) {
-                            SessionService.CurrentSession.Hero.HeroOwnership.Rations += rationAmountEvent.Amount;
-                            await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
-                            Snackbar.Add($"Rations changed by {rationAmountEvent.Amount}", Severity.Info);
-                        }
-                        else {
+                        SessionService.CurrentSession.Hero.HeroOwnership.Rations += rationAmountEvent.Amount;
+                        if (SessionService.CurrentSession.Hero.HeroOwnership.Rations < 0) {
                             SessionService.CurrentSession.Hero.HeroOwnership.Rations = 0;
                             SessionService.CurrentSession.Hero.Endurance -= 2;
-                            await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
                             Snackbar.Add($"Not enough rations existing, you loose 2 endurance points", Severity.Warning);
                         }
+                        else {
+                            Snackbar.Add($"Rations changed by {rationAmountEvent.Amount}", Severity.Info);
+                        }
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
                         break;
                     case "DropAllWeaponEvent":
                         var allWeapons = SessionService.CurrentSession.Hero.Inventory.Items
@@ -156,6 +155,18 @@
                         var dialog3 = DialogService.Show<StoryEventDialog>($"Story Event", parametersD3, optionsD3);
 
                         var resultD3 = await dialog3.Result;
+                        break;
+                    case "MissionAccomplishedEvent":
+                        var optionsD4 = new DialogOptions { CloseButton = false };
+                        var dialog4 = DialogService.Show<MissionAccomplishedDialog>($"Mission Completed!", optionsD4);
+
+                        var resultD4 = await dialog4.Result;
+                        break;
+                    case "MissionFailedEvent":
+                        var optionsD5 = new DialogOptions { CloseButton = false };
+                        var dialog5 = DialogService.Show<MissionFailedDialog>($"Mission Failed!", optionsD5);
+
+                        var resultD5 = await dialog5.Result;
                         break;
                 }
             }
