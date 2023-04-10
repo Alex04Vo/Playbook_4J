@@ -1,6 +1,7 @@
 ﻿@using Model.Entities.Events
 @using System.ComponentModel.DataAnnotations
 @using Domain.Repositories.Interfaces
+@using Model.Entities.Creatures
 @using Model.Entities.Events.SubEvents
 @using Model.Entities.Events.SubEvents.ItemEvents
 @using Model.Entities.Events.SubEvents.ValueEffects
@@ -167,6 +168,15 @@
                         var dialog5 = DialogService.Show<MissionFailedDialog>($"Mission Failed!", optionsD5);
 
                         var resultD5 = await dialog5.Result;
+                        break;
+                    case "CombatEvent":
+                        var combatEvent = (CombatEvent) e;
+                        var optionsD6 = new DialogOptions { CloseButton = false};
+                        var parametersD6 = new DialogParameters();
+                        parametersD6.Add("Creature", combatEvent.Creature);
+                        var dialog6 = DialogService.Show<CombatEventDialog>($"Fight with {combatEvent.Creature.Type}!", parametersD6, optionsD6);
+
+                        var resultD6 = await dialog6.Result;
                         break;
                 }
             }
