@@ -1,7 +1,9 @@
 ﻿@using Model.Entities.Sections.StorySections
 @using System.ComponentModel.DataAnnotations
 @using Domain.Repositories.Interfaces
+@using Model.Entities.Abilities
 @using Model.Entities.Events
+@using Model.Entities.Events.SubEvents.ValueEffects
 @using Model.Entities.Heroes
 @using Model.Entities.Outcomes.Models
 @using Model.Entities.Outcomes.SubOutcomes
@@ -11,6 +13,7 @@
 @inject SessionService SessionService
 @inject IHeroRepository HeroRepository
 @inject IDialogService DialogService
+@inject IEventRepository EventRepository
 
 @if (SessionService.CurrentSession is not null) {
     <div class="container-fluid">
@@ -82,10 +85,21 @@
 
     private async Task NavToOutcome(DisplayOutcome dOutcome) {
         if (SessionService.CurrentSession is not null) {
+            Events = await EventRepository.GetEventsOfSectionAsync(Section.Id);
+            if (Events.Any(e=>e.GetType().Name=="CombatSkillTempChangeEvent")) {
+                var changeEvents = Events.Where(e => e.GetType().Name == "CombatSkillTempChangeEvent").ToList();
+                List<CombatSkillTempChangeEvent> tempChanges = new();
+                changeEvents.ForEach(e=>tempChanges.Add((CombatSkillTempChangeEvent)e));
+                tempChanges.ForEach(e=>SessionService.CurrentSession.Hero.CombatSkill -= e.Amount);
+            }
             if (dOutcome.Type == "GoldOutcome") {
                 var outcome = (GoldOutcome) dOutcome.Outcome;
                 SessionService.CurrentSession.Hero.HeroOwnership.GoldCoins += outcome.Amount;
                 await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+            }
+            if (SessionService.CurrentSession.Hero.Endurance < SessionService.CurrentSession.Hero.InitialEndurance && 
+                SessionService.CurrentSession.Hero.Abilities.Any(a=>a.AbilityType == EAbilityType.HEALING)) {
+                SessionService.CurrentSession.Hero.Endurance += 1;
             }
             await SessionService.SaveChoosenSection(Section.BookId, Section.Id, dOutcome.Outcome.Section!.Id);
             NavManager.NavigateTo($"/s/{SessionService.CurrentSession!.Id}/books/{Section.BookId}/sections/{dOutcome.Outcome.Section!.SectionNumber}");

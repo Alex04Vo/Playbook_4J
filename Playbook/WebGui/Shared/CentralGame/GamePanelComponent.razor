@@ -3,11 +3,21 @@
 @using Model.Entities.Sections.StorySections
 @using Model.Entities.Sessions
 @inject ILogger<GamePanelComponent> Logger
+@inject IDialogService DialogService
+
 <MudCard>
     <MudCardContent>
-        <MudText Color="Color.Primary" Typo="Typo.h5" Class="mb-2">
-            <strong>@Hero.Name</strong>
-        </MudText>
+        <div class="d-flex">
+            <MudText Color="Color.Primary" Typo="Typo.h5" Class="mb-2">
+                <strong>@Hero.Name</strong>
+            </MudText>
+            <MudSpacer/>
+            <MudButton OnClick="ShowMap" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                       Size="Size.Small" Color="Color.Primary">
+                Map
+            </MudButton>
+            
+        </div>
         <MudDivider/>
         <div class="container-fluid">
             <div class="row">
@@ -74,5 +84,12 @@
 @code {
     [Parameter, Required]
     public Hero Hero { get; set; } = new();
+
+    private async Task ShowMap() {
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Large};
+        var dialog = DialogService.Show<ShowMapDialog>($"Map", options);
+
+        var result = await dialog.Result;
+    }
 
 }

@@ -22,6 +22,10 @@ public class Hero {
     public int Endurance { get; set; }
     
     [Required, Range(0,200)]
+    [Column("INITIAL_ENDURANCE")]
+    public int InitialEndurance { get; set; }
+    
+    [Required, Range(0,200)]
     [Column("COMBAT_SKILL")]
     public int CombatSkill { get; set; }
 

@@ -62,7 +62,10 @@
                         Snackbar.Add($"Combat Skill changed by {combatSkillEventEvent.Amount}", Severity.Info);
                         break;
                     case "CombatSkillTempChangeEvent":
-                        //TODO
+                        var tempChange = (CombatSkillTempChangeEvent) e;
+                        SessionService.CurrentSession.Hero.CombatSkill += tempChange.Amount;
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"Temp. Combat Skill changed by {tempChange.Amount}", Severity.Info);
                         break;
                     case "EnduranceEvent":
                         var enduranceEvent = (EnduranceEvent) e;

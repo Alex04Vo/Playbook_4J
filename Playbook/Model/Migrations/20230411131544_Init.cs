@@ -503,6 +503,7 @@ namespace Model.Migrations
                     NAME = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ENDURANCE = table.Column<int>(type: "int", nullable: false),
+                    INITIAL_ENDURANCE = table.Column<int>(type: "int", nullable: false),
                     COMBAT_SKILL = table.Column<int>(type: "int", nullable: false),
                     SESSION_ID = table.Column<int>(type: "int", nullable: false),
                     HERO_LEVEL = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -545,7 +546,9 @@ namespace Model.Migrations
                 columns: table => new
                 {
                     SECTION_ID = table.Column<int>(type: "int", nullable: false),
-                    BOOK_ID = table.Column<int>(type: "int", nullable: false)
+                    BOOK_ID = table.Column<int>(type: "int", nullable: false),
+                    IS_COMPLETED = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    LAST_TIME_PLAYED = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -587,33 +590,6 @@ namespace Model.Migrations
                         column: x => x.HERO_ID,
                         principalTable: "HEROES",
                         principalColumn: "HERO_ID",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "SB_HAS_SECTIONS_JT",
-                columns: table => new
-                {
-                    SESSION_ID = table.Column<int>(type: "int", nullable: false),
-                    BOOK_ID = table.Column<int>(type: "int", nullable: false),
-                    SECTION_ID = table.Column<int>(type: "int", nullable: false),
-                    TIMESTAMP = table.Column<DateTime>(type: "datetime(6)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SB_HAS_SECTIONS_JT", x => new { x.SESSION_ID, x.BOOK_ID, x.SECTION_ID, x.TIMESTAMP });
-                    table.ForeignKey(
-                        name: "FK_SB_HAS_SECTIONS_JT_SECTIONS_BT_SECTION_ID",
-                        column: x => x.SECTION_ID,
-                        principalTable: "SECTIONS_BT",
-                        principalColumn: "SECTION_ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SB_HAS_SECTIONS_JT_SESSION_HAS_BOOKS_JT_SESSION_ID_BOOK_ID",
-                        columns: x => new { x.SESSION_ID, x.BOOK_ID },
-                        principalTable: "SESSION_HAS_BOOKS_JT",
-                        principalColumns: new[] { "SECTION_ID", "BOOK_ID" },
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -761,7 +737,7 @@ namespace Model.Migrations
                     OUTCOME_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ROOT_SECTION_ID = table.Column<int>(type: "int", nullable: false),
-                    SECTION_ID = table.Column<int>(type: "int", nullable: false),
+                    SECTION_ID = table.Column<int>(type: "int", nullable: true),
                     CONTENT = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
@@ -776,6 +752,32 @@ namespace Model.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OUTCOMES_BT_STORY_SECTIONS_SECTION_ID",
+                        column: x => x.SECTION_ID,
+                        principalTable: "STORY_SECTIONS",
+                        principalColumn: "SECTION_ID");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SB_HAS_SECTIONS_JT",
+                columns: table => new
+                {
+                    SESSION_ID = table.Column<int>(type: "int", nullable: false),
+                    BOOK_ID = table.Column<int>(type: "int", nullable: false),
+                    SECTION_ID = table.Column<int>(type: "int", nullable: false),
+                    TIMESTAMP = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SB_HAS_SECTIONS_JT", x => new { x.SESSION_ID, x.BOOK_ID, x.SECTION_ID, x.TIMESTAMP });
+                    table.ForeignKey(
+                        name: "FK_SB_HAS_SECTIONS_JT_SESSION_HAS_BOOKS_JT_SESSION_ID_BOOK_ID",
+                        columns: x => new { x.SESSION_ID, x.BOOK_ID },
+                        principalTable: "SESSION_HAS_BOOKS_JT",
+                        principalColumns: new[] { "SECTION_ID", "BOOK_ID" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SB_HAS_SECTIONS_JT_STORY_SECTIONS_SECTION_ID",
                         column: x => x.SECTION_ID,
                         principalTable: "STORY_SECTIONS",
                         principalColumn: "SECTION_ID",

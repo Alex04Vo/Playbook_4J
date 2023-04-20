@@ -11,8 +11,8 @@ using Model.Configuration;
 namespace Model.Migrations
 {
     [DbContext(typeof(PlaybookContext))]
-    [Migration("20230309132303_BookLasPlayed")]
-    partial class BookLasPlayed
+    [Migration("20230411131544_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -253,6 +253,10 @@ namespace Model.Migrations
                         .HasColumnType("int")
                         .HasColumnName("HERO_OWNERSHIP_ID");
 
+                    b.Property<int>("InitialEndurance")
+                        .HasColumnType("int")
+                        .HasColumnName("INITIAL_ENDURANCE");
+
                     b.Property<int>("InventoryId")
                         .HasColumnType("int")
                         .HasColumnName("INVENTORY_ID");
@@ -430,7 +434,7 @@ namespace Model.Migrations
                         .HasColumnType("int")
                         .HasColumnName("ROOT_SECTION_ID");
 
-                    b.Property<int>("SectionId")
+                    b.Property<int?>("SectionId")
                         .HasColumnType("int")
                         .HasColumnName("SECTION_ID");
 
@@ -534,6 +538,10 @@ namespace Model.Migrations
                     b.Property<int>("BookId")
                         .HasColumnType("int")
                         .HasColumnName("BOOK_ID");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("IS_COMPLETED");
 
                     b.Property<DateTime>("LastTimePlayed")
                         .HasColumnType("datetime(6)")
@@ -1106,7 +1114,7 @@ namespace Model.Migrations
             modelBuilder.Entity("Model.Entities.Events.AEvent", b =>
                 {
                     b.HasOne("Model.Entities.Sections.StorySections.StorySection", "Section")
-                        .WithMany()
+                        .WithMany("Events")
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1171,7 +1179,7 @@ namespace Model.Migrations
             modelBuilder.Entity("Model.Entities.Heroes.Inventories.InventoryItem", b =>
                 {
                     b.HasOne("Model.Entities.Heroes.Inventories.Inventory", "Inventory")
-                        .WithMany()
+                        .WithMany("Items")
                         .HasForeignKey("InventoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1197,9 +1205,7 @@ namespace Model.Migrations
 
                     b.HasOne("Model.Entities.Sections.StorySections.StorySection", "Section")
                         .WithMany()
-                        .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SectionId");
 
                     b.Navigation("RootSection");
 
@@ -1258,7 +1264,7 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Entities.Sessions.SectionHistory", b =>
                 {
-                    b.HasOne("Model.Entities.Sections.ASection", "Section")
+                    b.HasOne("Model.Entities.Sections.StorySections.StorySection", "Section")
                         .WithMany()
                         .HasForeignKey("SectionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1611,6 +1617,11 @@ namespace Model.Migrations
                     b.Navigation("Abilities");
                 });
 
+            modelBuilder.Entity("Model.Entities.Heroes.Inventories.Inventory", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("Model.Entities.Sessions.PlayedBook", b =>
                 {
                     b.Navigation("Sections");
@@ -1636,6 +1647,8 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Entities.Sections.StorySections.StorySection", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Outcomes");
                 });
 #pragma warning restore 612, 618
