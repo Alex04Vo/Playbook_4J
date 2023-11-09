@@ -1,0 +1,195 @@
+﻿@using Model.Entities.Events
+@using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Creatures
+@using Model.Entities.Events.SubEvents
+@using Model.Entities.Events.SubEvents.ItemEvents
+@using Model.Entities.Events.SubEvents.ValueEffects
+@using WebGui.Services
+@inject SessionService SessionService
+@inject IHeroRepository HeroRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (Events.Any()) {
+            <div class="container-md">
+                @foreach (var e in Events) {
+                    <div>
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(Events.IndexOf(e) != 0)"
+                                   Class="m-2 w-100" OnClick="() => HandleSingleEvent(e)">
+                            @e.GetReadableType()
+                        </MudButton>
+                    </div>
+                }
+            </div>
+        }
+        else {
+            <MudText Color="Color.Primary" Typo="Typo.body1">No more Events in this Section!</MudText>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!Events.Any()) {
+            <MudButton OnClick="Close" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                       Size="Size.Small" Color="Color.Primary">
+                Return to Section
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter, Required]
+    public List<AEvent> Events { get; set; } = new();
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    private async Task HandleSingleEvent(AEvent e) {
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        try {
+            if (SessionService.CurrentSession is not null) {
+                switch (e.GetType().Name) {
+                    case "CombatSkillEvent":
+                        var combatSkillEventEvent = (CombatSkillEvent) e;
+                        SessionService.CurrentSession.Hero.CombatSkill += combatSkillEventEvent.Amount;
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"Combat Skill changed by {combatSkillEventEvent.Amount}", Severity.Info);
+                        break;
+                    case "CombatSkillTempChangeEvent":
+                        var tempChange = (CombatSkillTempChangeEvent) e;
+                        SessionService.CurrentSession.Hero.CombatSkill += tempChange.Amount;
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"Temp. Combat Skill changed by {tempChange.Amount}", Severity.Info);
+                        break;
+                    case "EnduranceEvent":
+                        var enduranceEvent = (EnduranceEvent) e;
+                        SessionService.CurrentSession.Hero.Endurance += enduranceEvent.Amount;
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"Endurance changed by {enduranceEvent.Amount}", Severity.Info);
+                        break;
+                    case "GoldAmountEvent":
+                        var goldAmountEvent = (GoldAmountEvent) e;
+                        SessionService.CurrentSession.Hero.HeroOwnership.GoldCoins += goldAmountEvent.Amount;
+                        if (SessionService.CurrentSession.Hero.HeroOwnership.GoldCoins < 0) {
+                            SessionService.CurrentSession.Hero.HeroOwnership.GoldCoins = 0;
+                        }
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"Gold Coins changed by {goldAmountEvent.Amount}", Severity.Info);
+                        break;
+                    case "RationAmountEvent":
+                        var rationAmountEvent = (RationAmountEvent) e;
+                        SessionService.CurrentSession.Hero.HeroOwnership.Rations += rationAmountEvent.Amount;
+                        if (SessionService.CurrentSession.Hero.HeroOwnership.Rations < 0) {
+                            SessionService.CurrentSession.Hero.HeroOwnership.Rations = 0;
+                            SessionService.CurrentSession.Hero.Endurance -= 2;
+                            Snackbar.Add($"Not enough rations existing, you loose 2 endurance points", Severity.Warning);
+                        }
+                        else {
+                            Snackbar.Add($"Rations changed by {rationAmountEvent.Amount}", Severity.Info);
+                        }
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        break;
+                    case "DropAllWeaponEvent":
+                        var allWeapons = SessionService.CurrentSession.Hero.Inventory.Items
+                            .Where(i => i.Item.GetType().Name == "Weapon").ToList();
+                        allWeapons.ForEach(i=>SessionService.CurrentSession.Hero.Inventory.Items.Remove(i));
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"You have lost all your weapons!", Severity.Warning);
+                        break;
+                    case "DropWeaponEvent":
+                        var weapons = SessionService.CurrentSession.Hero.Inventory.Items
+                            .Where(i => i.Item.GetType().Name == "Weapon").ToList();
+                        if (weapons.Any()) {
+                            if (weapons.Count > 1) {
+                                var parametersD1 = new DialogParameters();
+                                parametersD1.Add("Weapons", weapons);
+                                var optionsD1 = new DialogOptions { CloseButton = false };
+                                var dialog1 = DialogService.Show<DropWeaponDialog>($"Choose a Weapon to Drop", parametersD1, optionsD1);
+
+                                var resultD1 = await dialog1.Result;
+                            }
+                            else {
+                                weapons.ForEach(i=>SessionService.CurrentSession.Hero.Inventory.Items.Remove(i));
+                                await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                                Snackbar.Add($"You have lost all your weapons!", Severity.Warning);
+                            }
+                        }
+                        break;
+                    case "DropItemEvent":
+                        var dropItemEvent = (DropItemEvent) e;
+                        var items = SessionService.CurrentSession.Hero.Inventory.Items
+                            .Where(i => i.Item.Id == dropItemEvent.ItemId).ToList();
+                        foreach (var item in items) {
+                            SessionService.CurrentSession.Hero.Inventory.Items.Remove(item);
+                            Snackbar.Add($"You have lost: {item.Item.Name}", Severity.Warning);
+                        }
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        break;
+                    case "DropBackpackEvent":
+                        var backpackItems = SessionService.CurrentSession.Hero.Inventory.Items
+                            .Where(i => i.Item.GetType().Name == "BackPack" || i.Item.GetType().Name == "MagicalItem"|| i.Item.GetType().Name == "Utility")
+                            .ToList();
+                        backpackItems.ForEach(i=>SessionService.CurrentSession.Hero.Inventory.Items.Remove(i));
+                        SessionService.CurrentSession.Hero.HeroOwnership.Rations = 0;
+                        await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                        Snackbar.Add($"You have lost your backpack and all your rations!", Severity.Warning);
+                        break;
+                    case "AcquireItemEvent":
+                        var acquireItemEvent = (AcquireItemEvent) e;
+                        var acquireItem = acquireItemEvent.Item;
+                        
+                        var parametersD2 = new DialogParameters();
+                        parametersD2.Add("Item", acquireItem);
+                        var optionsD2 = new DialogOptions { CloseButton = false };
+                        var dialog2 = DialogService.Show<AcquireItemDialog>($"Do you want to take this item?", parametersD2, optionsD2);
+
+                        var resultD2 = await dialog2.Result;
+                        break;
+                    case "StoryEvent":
+                        var storyEvent = (StoryEvent) e;
+                        var parametersD3 = new DialogParameters();
+                        parametersD3.Add("StoryEvent", storyEvent);
+                        var optionsD3 = new DialogOptions { CloseButton = false };
+                        var dialog3 = DialogService.Show<StoryEventDialog>($"Story Event", parametersD3, optionsD3);
+
+                        var resultD3 = await dialog3.Result;
+                        break;
+                    case "MissionAccomplishedEvent":
+                        var optionsD4 = new DialogOptions { CloseButton = false };
+                        var dialog4 = DialogService.Show<MissionAccomplishedDialog>($"Mission Completed!", optionsD4);
+
+                        var resultD4 = await dialog4.Result;
+                        break;
+                    case "MissionFailedEvent":
+                        var optionsD5 = new DialogOptions { CloseButton = false };
+                        var dialog5 = DialogService.Show<MissionFailedDialog>($"Mission Failed!", optionsD5);
+
+                        var resultD5 = await dialog5.Result;
+                        break;
+                    case "CombatEvent":
+                        var combatEvent = (CombatEvent) e;
+                        var optionsD6 = new DialogOptions { CloseButton = false};
+                        var parametersD6 = new DialogParameters();
+                        parametersD6.Add("Creature", combatEvent.Creature);
+                        var dialog6 = DialogService.Show<CombatEventDialog>($"Fight with {combatEvent.Creature.Type}!", parametersD6, optionsD6);
+
+                        var resultD6 = await dialog6.Result;
+                        break;
+                }
+            }
+            Events.Remove(e);
+            StateHasChanged();
+        }
+        catch (Exception exception) {
+            Console.WriteLine(exception);
+            throw;
+        }
+    }
+
+}

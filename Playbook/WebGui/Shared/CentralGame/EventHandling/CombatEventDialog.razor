@@ -1,0 +1,191 @@
+﻿@using Model.Entities.Heroes.Inventories
+@using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Creatures
+@using Model.Entities.Creatures.Models
+@using Model.Entities.Heroes
+@using WebGui.Services
+@inject SessionService SessionService
+@inject IHeroRepository HeroRepository
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        @if (SessionService.CurrentSession is not null) {
+            <div class="container-md m-4">
+                <div class="row">
+                    <div class="col-4 d-flex align-items-center justify-content-center">
+                        <div>
+                            <MudImage Src="images/hero.png" Alt="@Hero.Name" Height="200" Elevation="4" Class="rounded-lg"/>
+                            <br/>
+                            <br/>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">@Hero.Name</MudText>
+                            <MudText Typo="Typo.body2">Endurance: <strong>@Hero.Endurance</strong></MudText>
+                            <MudText Typo="Typo.body2">Combat Skill: <strong>@Hero.CombatSkill</strong></MudText>
+                        </div>
+                    </div>
+                    <div class="col-4  d-flex align-items-center justify-content-center">
+                        <MudText Typo="Typo.h4">VS.</MudText>
+                    </div>
+                    <div class="col-4  d-flex align-items-center justify-content-center">
+                        <div>
+                            <MudImage Src="@Creature.ImageUrl" Alt="@Creature.Type" Height="150" Elevation="10" Class="rounded-lg"/>
+                            <br/>
+                            <br/>
+                            <MudText Typo="Typo.h6" Color="Color.Tertiary">@Creature.Type</MudText>
+                            <MudText Typo="Typo.body2">Endurance: <strong>@CreatureEndurance</strong></MudText>
+                            <MudText Typo="Typo.body2">Combat Skill: <strong>@Creature.CombatSkill</strong></MudText>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <div>
+                            <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                                       Class="m-2 w-100" OnClick="Fight" Disabled="@(!_activeFight)">
+                                Fight!
+                            </MudButton>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col d-flex justify-content-center">
+                        <MudText Typo="Typo.body2" Align="Align.Center">
+                            <strong>@Hero.CombatSkill</strong> (Hero Combat Skill) - <strong>@Creature.CombatSkill</strong> (Creature Combat Skill) => <strong>@(Hero.CombatSkill - Creature.CombatSkill)</strong>
+                        </MudText>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col">
+                        @if (CombatRounds.Any()) {
+                            @foreach (var round in CombatRounds) {
+                                <MudPaper Class="pa-6 mb-2" Outlined="true">
+                                    <MudText Typo="Typo.h6">Round @(CombatRounds.IndexOf(round) + 1)</MudText>
+                                    <br/>
+                                    <MudText Typo="Typo.body2">Fight Factor: @round.RandomNumber</MudText>
+                                    <MudText Typo="Typo.body2">Hero Endurance Loss: @round.EnduranceLossHero</MudText>
+                                    <MudText Typo="Typo.body2">Creature Endurance Loss: @round.EnduranceLossEnemy</MudText>
+                                </MudPaper>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!_activeFight) {
+            <MudButton OnClick="Close" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                       Size="Size.Small" Color="Color.Primary">
+                Close
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter, Required]
+    public Creature Creature { get; set; } = new();
+
+    public int CreatureEndurance { get; set; }
+    
+    public List<CombatRound> CombatRounds { get; set; } = new();
+
+    public Hero Hero => SessionService.CurrentSession!.Hero;
+
+    private bool _activeFight = true;
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    protected override void OnInitialized() {
+        if (Creature is not null) {
+            CreatureEndurance = Creature.Endurance;
+        }
+    }
+
+    private async Task Fight() {
+        if (SessionService.CurrentSession is not null) {
+            CombatRound round = new CombatRound() {
+                CombatRatio = Hero.CombatSkill - Creature.CombatSkill,
+                RandomNumber = new Random().Next(0, 10)
+            };
+
+            if (round.CombatRatio >= 9 && round.RandomNumber > 5) {
+                round.EnduranceLossHero = 0;
+                round.EnduranceLossEnemy = -15;
+            }
+            if (round.CombatRatio <= -9 && round.RandomNumber > 5) {
+                round.EnduranceLossHero = -10;
+                round.EnduranceLossEnemy = 0;
+            }
+
+            var x = (round.CombatRatio * round.RandomNumber) / 10;
+
+            switch (x) {
+                case >= 5:
+                    round.EnduranceLossHero = -2;
+                    round.EnduranceLossEnemy = -5;
+                    break;
+                case > 0:
+                    round.EnduranceLossHero = -1;
+                    round.EnduranceLossEnemy = -3;
+                    break;
+                case > -5:
+                    round.EnduranceLossHero = -3;
+                    round.EnduranceLossEnemy = -1;
+                    break;
+                case > -9:
+                    round.EnduranceLossHero = -5;
+                    round.EnduranceLossEnemy = -2;
+                    break;
+                default:
+                    round.EnduranceLossHero = -2;
+                    round.EnduranceLossEnemy = -2;
+                    break;
+            }
+
+            CreatureEndurance += round.EnduranceLossEnemy;
+            Hero.Endurance += round.EnduranceLossHero;
+
+            if (Hero.Endurance <= 0) {
+                Hero.Endurance = 0;
+            }
+            await HeroRepository.UpdateAsync(Hero);
+            
+            if (Hero.Endurance == 0) {
+                GameOver();
+                return;
+            }
+            if (CreatureEndurance <= 0) {
+                Victory();
+                return;
+            }
+            
+            CombatRounds.Add(round);
+            StateHasChanged();
+        }
+    }
+
+    private void GameOver() {
+        _activeFight = false;
+        var options = new DialogOptions {CloseButton = false};
+        var dialog = DialogService.Show<MissionFailedDialog>($"Loss - Game Over!", options);
+    }
+
+    private void Victory() {
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Add($"The {Creature.Type} died! You won!", Severity.Success);
+        _activeFight = false;
+    }
+
+}

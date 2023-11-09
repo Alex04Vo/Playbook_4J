@@ -1,0 +1,45 @@
+﻿@using Model.Entities.Heroes.Inventories
+@using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Events.SubEvents
+@using Model.Entities.Items
+@using WebGui.Services
+@inject NavigationManager NavManager
+@inject SessionService SessionService
+@inject ISessionRepository SessionRepository
+
+<MudDialog>
+    <DialogContent>
+        <div class="container-md">
+            <div class="row">
+                <MudText Color="Color.Primary" Typo="Typo.h6">You win!</MudText>
+                <br/>
+            </div>
+            <div class="row">
+                <MudText Typo="Typo.body1">Play further books or return to the home screen!</MudText>
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="NavToHome" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                   Size="Size.Small" Color="Color.Primary">
+            Return To Home
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    async Task NavToHome() {
+        if (SessionService.CurrentSession is not null) {
+            NavManager.NavigateTo("/");
+            Close();
+        }
+    }
+
+}

@@ -1,0 +1,43 @@
+﻿@using WebGui.Services
+@inject UserService UserService
+@inject NavigationManager NavManager
+
+<MudAppBar Elevation="1" Color="Color.Primary">
+    <MudLink Typo="Typo.h5" Class="ml-3" Underline="Underline.None" Color="Color.Inherit" Href="/">Playbook</MudLink>
+    <MudSpacer/>
+    @if (_logedIn) {
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Logout" OnClick="Logout">Logout</MudButton>
+    }
+    else {
+        <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Login" OnClick="Login">Login</MudButton>
+    }
+</MudAppBar>
+
+@code {
+    protected override void OnInitialized() {
+        UserService.RegisterMethodForLoginStateChangeEvent(SwitchMode);
+    }
+
+    private bool _logedIn = false;
+    
+    private bool SwitchMode() {
+        if (UserService.CurrentUser is not null) {
+            _logedIn = true;
+        }
+        else {
+            _logedIn = false;
+        }
+        StateHasChanged();
+        return _logedIn;
+    }
+    
+    private async Task Logout() {
+        await UserService.LogoutAsync();
+        NavManager.NavigateTo($"/");
+    }
+    
+    private void Login() {
+        NavManager.NavigateTo($"/auth");
+    }
+
+}

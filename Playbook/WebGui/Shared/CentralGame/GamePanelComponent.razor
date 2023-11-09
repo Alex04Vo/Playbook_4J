@@ -1,0 +1,95 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using Model.Entities.Heroes
+@using Model.Entities.Sections.StorySections
+@using Model.Entities.Sessions
+@inject ILogger<GamePanelComponent> Logger
+@inject IDialogService DialogService
+
+<MudCard>
+    <MudCardContent>
+        <div class="d-flex">
+            <MudText Color="Color.Primary" Typo="Typo.h5" Class="mb-2">
+                <strong>@Hero.Name</strong>
+            </MudText>
+            <MudSpacer/>
+            <MudButton OnClick="ShowMap" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                       Size="Size.Small" Color="Color.Primary">
+                Map
+            </MudButton>
+            
+        </div>
+        <MudDivider/>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xxl-6 col-xl-12">
+                    <MudList Dense="true">
+                        <MudListItem Avatar="@Icons.Material.Filled.HealthAndSafety">
+                            <MudText Typo="Typo.body1">
+                                <div>Endurance </div><strong>@Hero.Endurance</strong>
+                            </MudText>
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Shield">
+                            <MudText Typo="Typo.body1">
+                                <div>Combat Skill </div><strong>@Hero.CombatSkill</strong>
+                            </MudText>
+                        </MudListItem>
+                    </MudList>
+                </div>
+                <div class="col-xxl-6 col-xl-12">
+                    <MudList Dense="true">
+                        <MudListItem Avatar="@Icons.Material.Filled.AttachMoney">
+                            <MudText Typo="Typo.body1">
+                                <div>Gold Coins </div><strong>@Hero.HeroOwnership.GoldCoins</strong>
+                            </MudText>
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Fastfood">
+                            <MudText Typo="Typo.body1">
+                                <div>Rations </div><strong>@Hero.HeroOwnership.Rations</strong>
+                            </MudText>
+                        </MudListItem>
+                    </MudList>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xxl-6 col-xl-12">
+                    <MudText Color="Color.Primary" Typo="Typo.body1">
+                        <strong>Abilities:</strong>
+                    </MudText>
+                    <MudList Clickable="false" Dense="true" DisableGutters="true">
+                        @foreach (var ability in Hero.Abilities) {
+                            <MudListItem Icon="@Icons.Material.Filled.ChevronRight" IconColor="Color.Secondary">
+                                <strong>@ability.Ability.ToReadableType()</strong>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </div>
+                <div class="col-xxl-6 col-xl-12">
+                    <MudText Color="Color.Primary" Typo="Typo.body1">
+                        <strong>Items:</strong>
+                    </MudText>
+                    <MudList Clickable="false" Dense="true" DisableGutters="true">
+                        @foreach (var item in Hero.Inventory.Items) {
+                            <MudListItem Icon="@Icons.Material.Filled.ChevronRight" IconColor="Color.Secondary">
+                                <strong>@item.Item.Name</strong>
+                            </MudListItem>
+                        }
+                    </MudList>
+                </div>
+
+            </div>
+        </div>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, Required]
+    public Hero Hero { get; set; } = new();
+
+    private async Task ShowMap() {
+        var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Large};
+        var dialog = DialogService.Show<ShowMapDialog>($"Map", options);
+
+        var result = await dialog.Result;
+    }
+
+}

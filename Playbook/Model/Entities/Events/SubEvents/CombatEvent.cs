@@ -9,4 +9,8 @@ public class CombatEvent : AEvent {
     [Column("CREATURE_ID")] 
     public int CreatureId { get; set; }
     public Creature Creature { get; set; }
+    
+    public override string GetReadableType() {
+        return "Combat Event";
+    }
 }

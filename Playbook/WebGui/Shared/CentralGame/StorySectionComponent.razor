@@ -1,32 +1,124 @@
 ﻿@using Model.Entities.Sections.StorySections
 @using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Abilities
+@using Model.Entities.Events
+@using Model.Entities.Events.SubEvents.ValueEffects
+@using Model.Entities.Heroes
+@using Model.Entities.Outcomes.Models
+@using Model.Entities.Outcomes.SubOutcomes
+@using WebGui.Services
+@using WebGui.Shared.CentralGame.EventHandling
 @inject NavigationManager NavManager
+@inject SessionService SessionService
+@inject IHeroRepository HeroRepository
+@inject IDialogService DialogService
+@inject IEventRepository EventRepository
 
-<MudCard>
-    <MudCardHeader>
-        <h4 class="text-primary">@Section.Book.Title - @Section.SectionNumber</h4>
-    </MudCardHeader>
-    <MudCardContent>
-        <div>@Section.Content</div>
-        <br/>
-        <MudDivider/>
-        <br/>
-        @foreach (var outcome in Section.Outcomes) {
-            <div>
-                <MudButton Color="Color.Primary" Variant="Variant.Outlined" Class="m-2 w-100" OnClick="() => NavToOutcome(outcome.Section.SectionNumber)">
-                    @outcome.Content - @outcome.Section.SectionNumber
-                </MudButton>
+@if (SessionService.CurrentSession is not null) {
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Color="Color.Primary" Typo="Typo.h5">@Section.Book.Title - @Section.SectionNumber</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body1">@Section.Content</MudText>
+                        <br/>
+                        <MudDivider/>
+                        <br/>
+                        @if (Events.Any()) {
+                            <div>
+                                <MudButton Color="Color.Tertiary" Variant="Variant.Filled"
+                                           Class="m-2 w-100" OnClick="HandleEvents">
+                                    Show Events!
+                                </MudButton>
+                            </div>
+                        }
+                        @if (Outcomes.Any()) {
+                            @if (Outcomes.Any(o => o.Type == "RandomOutcome")) {
+                                <MudAlert Severity="Severity.Info" ContentAlignment="HorizontalAlignment.Center" Class="mx-4">Random Number: <strong>@Outcomes.First().RandomNumber</strong></MudAlert>
+                                <br/>
+                            }
+                            @foreach (var outcome in Outcomes) {
+                                @if (outcome.Outcome.Section is not null) {
+                                    <div>
+                                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" Disabled="@(!outcome.IsChooseable || Events.Any())"
+                                                   Class="m-2 w-100" OnClick="() => NavToOutcome(outcome)">
+                                            @outcome.Outcome.Content - @outcome.Outcome.Section.SectionNumber
+                                        </MudButton>
+                                    </div>
+                                }
+                                else {
+                                    <div>
+                                        <MudButton Color="Color.Tertiary" Variant="Variant.Outlined" Disabled="@(!outcome.IsChooseable)"
+                                                   Class="m-2 w-100">
+                                            @outcome.Outcome.Content
+                                        </MudButton>
+                                    </div>
+                                }
+                            }
+                        }
+                    </MudCardContent>
+                </MudCard>
             </div>
-        }
-    </MudCardContent>
-</MudCard>
+            <div class="col-4">
+                <GamePanelComponent Hero="SessionService.CurrentSession.Hero"/>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
 
     [Parameter, Required]
     public StorySection Section { get; set; } = new();
 
-    private void NavToOutcome(int sectioNumber) {
-        NavManager.NavigateTo($"/books/{Section.BookId}/sections/{sectioNumber}");
+    [Parameter, Required]
+    public List<DisplayOutcome> Outcomes { get; set; } = new();
+    
+    [Parameter, Required]
+    public List<AEvent> Events { get; set; } = new();
+
+    private bool _openEventsExisting = false;
+
+    private async Task NavToOutcome(DisplayOutcome dOutcome) {
+        if (SessionService.CurrentSession is not null) {
+            Events = await EventRepository.GetEventsOfSectionAsync(Section.Id);
+            if (Events.Any(e=>e.GetType().Name=="CombatSkillTempChangeEvent")) {
+                var changeEvents = Events.Where(e => e.GetType().Name == "CombatSkillTempChangeEvent").ToList();
+                List<CombatSkillTempChangeEvent> tempChanges = new();
+                changeEvents.ForEach(e=>tempChanges.Add((CombatSkillTempChangeEvent)e));
+                tempChanges.ForEach(e=>SessionService.CurrentSession.Hero.CombatSkill -= e.Amount);
+            }
+            if (dOutcome.Type == "GoldOutcome") {
+                var outcome = (GoldOutcome) dOutcome.Outcome;
+                SessionService.CurrentSession.Hero.HeroOwnership.GoldCoins += outcome.Amount;
+                await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+            }
+            if (SessionService.CurrentSession.Hero.Endurance < SessionService.CurrentSession.Hero.InitialEndurance && 
+                SessionService.CurrentSession.Hero.Abilities.Any(a=>a.AbilityType == EAbilityType.HEALING)) {
+                SessionService.CurrentSession.Hero.Endurance += 1;
+            }
+            await SessionService.SaveChoosenSection(Section.BookId, Section.Id, dOutcome.Outcome.Section!.Id);
+            NavManager.NavigateTo($"/s/{SessionService.CurrentSession!.Id}/books/{Section.BookId}/sections/{dOutcome.Outcome.Section!.SectionNumber}");
+        }
+    }
+
+    private async Task HandleEvents() {
+        if (SessionService.CurrentSession is not null) {
+            
+            var parameters = new DialogParameters();
+            parameters.Add("Events", Events);
+            var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.Medium, FullWidth = true};
+            var dialog = DialogService.Show<EventHandlerDialog>($"Events - Section {Section.SectionNumber}", parameters, options);
+
+            var result = await dialog.Result;
+            if (!result.Cancelled) {
+                Events = new();
+                StateHasChanged();
+            }
+        }
     }
 }

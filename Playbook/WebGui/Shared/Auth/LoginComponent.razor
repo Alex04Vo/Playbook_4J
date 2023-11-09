@@ -1,0 +1,104 @@
+@using Domain.Exceptions
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Users.Models
+@using WebGui.Services
+@inject UserService UserService
+@inject IUserRepository UserRepo
+@inject NavigationManager NavManager
+@inject ILogger<LoginComponent> _logger
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudCardContent>
+        <MudText Typo="Typo.h4">Login</MudText>
+        <MudTextField Label="Username " Class="mt-3"
+                      @bind-Value="Model.UserName" For="@(() => Model.UserName)"
+                      Required="true"/>
+        <MudTextField Label="Password "
+                      HelperText="" Class="mt-3"
+                      @bind-Value="Model.Password"
+                      For="@(() => Model.Password)"
+                      Required="true"
+                      Adornment="Adornment.End"
+                      InputType="@_pwdInputType"
+                      AdornmentIcon="@_pwdInputIcon"
+                      OnAdornmentClick="ShowPwd"/>
+    </MudCardContent>
+    <MudCardActions>
+        @if (!String.IsNullOrWhiteSpace(_error)) {
+            <MudAlert Severity="Severity.Error">
+               @_error
+            </MudAlert>
+        }
+        <MudButton ButtonType="ButtonType.Submit" @onclick="HandleLoginAsync" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Anmelden</MudButton>
+    </MudCardActions>
+</EditForm>
+
+@code {
+    private bool _isLoggingIn = false;
+    private bool _loginInformationIncorrect = false;
+
+    private string _error = "";
+
+    LoginModel Model { get; } = new()
+    {
+        UserName = "",
+        Password = ""
+    };
+    bool success;
+
+    private InputType _pwdInputType = InputType.Password;
+    private string _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    async Task HandleLoginAsync() {
+        try {
+            if (!String.IsNullOrWhiteSpace(Model.UserName) && !String.IsNullOrWhiteSpace(Model.Password)) {
+                _error = "";
+                _isLoggingIn = true;
+                await UserService.LoginAsync(Model);
+                _isLoggingIn = false;
+                _loginInformationIncorrect = false;
+
+                NavManager.NavigateTo("/");
+            }
+            else {
+                _error = "Username or Password not entered!";
+            }
+        }
+        catch (LoginException) {
+    // this is the only exception that can be thrown by the login method (we wrote that ourselves :))
+            _error = "Username or Password incorrect!";
+        }
+        catch (TaskCanceledException) {
+            _logger.LogInformation("Login canceled");
+        }
+        catch (OperationCanceledException) {
+            _logger.LogInformation("Login canceled");
+        }
+        catch (Exception e) {
+            _logger.LogError(e, "Login failed");
+            _error = "Login failed, please reload!";
+        }
+        finally {
+            _isLoggingIn = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ShowPwd() {
+        if (_pwdInputIcon == Icons.Material.Filled.Visibility) {
+            _pwdInputIcon = Icons.Material.Filled.VisibilityOff;
+            _pwdInputType = InputType.Password;
+        }
+        else {
+            _pwdInputIcon = Icons.Material.Filled.Visibility;
+            _pwdInputType = InputType.Text;
+        }
+    }
+
+    private void OnValidSubmit(EditContext context) {
+        success = true;
+        StateHasChanged();
+    }
+
+}

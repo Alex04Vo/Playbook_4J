@@ -15,5 +15,18 @@ public class StorySectionRepository : ARepository<StorySection>, IStorySectionRe
             .Include(s=>s.Book)
             .Include(s=>s.Outcomes)
             .ThenInclude(o=>o.Section)
+            .Include(s=>s.Events)
             .FirstOrDefaultAsync();
+    
+    public int GetFirstStorySectionId(int bookId) => 
+        Table.SingleOrDefault(s => s.BookId == bookId && s.SectionNumber == 1)!.Id;
+    
+    public async Task<List<StorySection>> ReadAllStorySectionsOfBookAsync(int bookId) =>
+        await Table
+            .Where(s => s.BookId == bookId)
+            .Include(s=>s.Outcomes)
+            .ThenInclude(o=>o.Section)
+            .OrderBy(s=>s.SectionNumber)
+            .ToListAsync();
+    
 }

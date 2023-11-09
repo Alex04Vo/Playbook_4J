@@ -9,6 +9,8 @@ using Model.Entities.Events;
 using Model.Entities.Events.SubEvents;
 using Model.Entities.Events.SubEvents.ItemEvents;
 using Model.Entities.Events.SubEvents.ValueEffects;
+using Model.Entities.Heroes;
+using Model.Entities.Heroes.Inventories;
 using Model.Entities.Items;
 using Model.Entities.Items.SubItems;
 using Model.Entities.Outcomes;
@@ -17,8 +19,9 @@ using Model.Entities.Regions;
 using Model.Entities.Sections;
 using Model.Entities.Sections.RuleSections;
 using Model.Entities.Sections.StorySections;
+using Model.Entities.Sessions;
 using Model.Entities.Users;
-using PlayerLevel = Model.Entities.Heroes.PlayerLevel;
+using PlayerLevel = Model.Entities.Heroes.PlayerLevels.PlayerLevel;
 
 namespace Model.Configuration; 
 
@@ -83,6 +86,16 @@ public class PlaybookContext : DbContext {
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<UserRoleClaim> RoleClaims { get; set; }
+
+    public DbSet<Session> Sessions { get; set; }
+    public DbSet<PlayedBook> PlayedBooks { get; set; }
+
+    public DbSet<Hero> Heroes { get; set; }
+    public DbSet<HeroOwnership> HeroOwnerships { get; set; }
+    public DbSet<Inventory> Inventories { get; set; }
+    public DbSet<InventoryItem> InventoryItems { get; set; }
+    public DbSet<SectionHistory> SectionHistories { get; set; }
+    public DbSet<HeroAbility> HeroAbilities { get; set; }
     
     public PlaybookContext(DbContextOptions<PlaybookContext> options) : base(options) {
         
@@ -188,7 +201,7 @@ public class PlaybookContext : DbContext {
         
         //AEvent - EVENTS_BT
         builder.Entity<AEvent>().HasOne(e => e.Section)
-            .WithMany()
+            .WithMany(s=>s.Events)
             .HasForeignKey(e => e.SectionId);
         
         //AItemEvent - ITEM_EVENTS_BT
@@ -227,5 +240,84 @@ public class PlaybookContext : DbContext {
                 new UserRole() { Id = 1, Identifier = "User", Description = "Simple User" },
                 new UserRole() { Id = 2, Identifier = "Admin", Description = "Administrator" }
             });
+        
+        // Session - SESSIONS
+        builder.Entity<Session>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId);
+        
+        // PlayedBook - SESSION_HAS_BOOKS_JT
+        builder.Entity<PlayedBook>()
+            .HasKey(b => new {b.SessionId, b.BookId});
+
+        builder.Entity<PlayedBook>()
+            .HasOne(b => b.Session)
+            .WithMany(s=>s.BooksPlaying)
+            .HasForeignKey(b => b.SessionId);
+        builder.Entity<PlayedBook>()
+            .HasOne(b => b.Book)
+            .WithMany()
+            .HasForeignKey(b => b.BookId);
+
+        // Inventory - INVENTORIES
+        builder.Entity<Inventory>()
+            .Property(i => i.InventoryState)
+            .HasConversion<string>();
+        
+        // Hero - HEROES
+        builder.Entity<Hero>()
+            .HasOne(h => h.Session)
+            .WithOne(s=>s.Hero)
+            .HasForeignKey<Hero>(h => h.SessionId);
+        builder.Entity<Hero>()
+            .HasOne(h => h.HeroLevel)
+            .WithMany()
+            .HasForeignKey(h => h.HeroLevelValue);
+        builder.Entity<Hero>()
+            .HasOne(h => h.Inventory)
+            .WithMany()
+            .HasForeignKey(h => h.InventoryId);
+        builder.Entity<Hero>()
+            .HasOne(h => h.HeroOwnership)
+            .WithMany()
+            .HasForeignKey(h => h.HeroOwnershipId);
+        
+        // InventoryItem - INVENTORY_HAS_ITEMS_JT
+        builder.Entity<InventoryItem>()
+            .HasKey(i => new {i.InventoryId, i.ItemId});
+        builder.Entity<InventoryItem>()
+            .HasOne(i => i.Inventory)
+            .WithMany(i=>i.Items)
+            .HasForeignKey(i => i.InventoryId);
+        builder.Entity<InventoryItem>()
+            .HasOne(i => i.Item)
+            .WithMany()
+            .HasForeignKey(i => i.ItemId);
+        
+        // SectionHistory - SB_HAS_SECTIONS_JT
+        builder.Entity<SectionHistory>()
+            .HasKey(h => new {h.SessionId, h.BookId, h.SectionId, h.Timestamp});
+        builder.Entity<SectionHistory>()
+            .HasOne(h => h.PlayedBook)
+            .WithMany(h=>h.Sections)
+            .HasForeignKey(h => new {h.SessionId, h.BookId});
+        builder.Entity<SectionHistory>()
+            .HasOne(h => h.Section)
+            .WithMany()
+            .HasForeignKey(h => h.SectionId);
+        
+        //HeroAbility - HERO_HAS_ABILITIES
+        builder.Entity<HeroAbility>()
+            .HasKey(a => new {a.HeroId, a.AbilityType});
+        
+        builder.Entity<HeroAbility>()
+            .HasOne(a => a.Hero)
+            .WithMany(h=>h.Abilities)
+            .HasForeignKey(a => a.HeroId);
+        builder.Entity<HeroAbility>()
+            .HasOne(a => a.Ability)
+            .WithMany()
+            .HasForeignKey(a => a.AbilityType);
     }
 }

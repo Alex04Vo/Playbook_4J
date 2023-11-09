@@ -1,0 +1,48 @@
+﻿@using Model.Entities.Heroes.Inventories
+@using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Events.SubEvents
+@using Model.Entities.Items
+@using WebGui.Services
+@inject SessionService SessionService
+@inject IHeroRepository HeroRepository
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (StoryEvent is not null) {
+            <div class="container-md">
+                <div class="row">
+                    <MudText Color="Color.Primary" Typo="Typo.h6">@StoryEvent.Title</MudText>
+                    <br/>
+                </div>
+                <div class="row">
+                    <div class="col-9">
+                        <MudText Typo="Typo.body1">@StoryEvent.Description</MudText>
+                    </div>
+                    <div class="col-3">
+                        <MudImage Src="@StoryEvent.ImageUrl" Alt="@StoryEvent.Title" Height="150" Elevation="10" Class="rounded-lg"/>
+                    </div>
+                </div>
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                   Size="Size.Small" Color="Color.Primary">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public StoryEvent? StoryEvent { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+}

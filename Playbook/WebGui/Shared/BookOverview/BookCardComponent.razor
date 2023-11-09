@@ -1,0 +1,66 @@
+﻿@using Model.Entities.Books
+@using Microsoft.AspNetCore.Mvc
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using WebGui.Services
+@inject NavigationManager NavManager
+@inject IDialogService DialogService
+@inject UserService UserService
+
+
+<MudCard Class="m-2">
+    <MudCardMedia Image="@Book.ImageUrl" Height="200"/>
+    <MudCardContent>
+        <MudText Typo="Typo.h5">@Book.Title</MudText>
+        @if (Book.TitlePage is not null) {
+            <MudText Typo="Typo.body2">@TakeFirstWords(Book.TitlePage.Content, 20)</MudText>
+        }
+    </MudCardContent>
+    <MudCardActions>
+        @if (UserService.CurrentUser is not null) {
+            <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="OpenDialog">Play Now!</MudButton>
+        }
+        else {
+            <MudButton Variant="Variant.Text" Color="Color.Secondary" Href="/login">Play Now!</MudButton>
+        }
+        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="NavToBookOverview">Learn More</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+
+    [Parameter, Required]
+    public Book Book { get; set; } = new();
+
+    private string TakeFirstWords(string input, int wordCount) {
+        IEnumerable<string> words = input.Split();
+        if (words.Count() > wordCount) {
+            words = words.Take(wordCount);
+            StringBuilder firstwords = new StringBuilder();
+            foreach (string s in words) {
+                firstwords.Append(s + " ");
+            }
+            firstwords.Append("...");
+            return firstwords.ToString();
+        }
+        else {
+            return input;
+        }
+    }
+
+    private void NavToBookOverview() {
+        NavManager.NavigateTo("/books/"+Book.Id);
+    }
+    
+    private async Task OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<SessionCreationDialog>("Create new Session", options);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled && UserService.CurrentUser is not null) {
+            NavManager.NavigateTo("/",true);
+        }
+    }
+
+}

@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using WebGui.Services
+@inherits LayoutComponentBase
+@inject UserService UserService
+@inject NavigationManager NavManager
 
 <MudThemeProvider Theme="_myCustomTheme"/>
 
@@ -6,39 +9,54 @@
     FullWidth="true"
     CloseButton="true"
     DisableBackdropClick="true"
-    Position="DialogPosition.Center"
-/>
+    Position="DialogPosition.Center"/>
 
 <MudSnackbarProvider/>
 
 <PageTitle>WebGui</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+<MudLayout>
+    <CustomAppBar/>
+    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"
+               OpenMiniOnHover="true" ClipMode="DrawerClipMode.Always" Style="background-color: #585858">
+        <CustomDrawerNavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        <div class="py-4 mx-5">
             @Body
-        </article>
-    </main>
-</div>
+        </div>
+    </MudMainContent>
+</MudLayout>
+
 
 @code{
+
     readonly MudTheme _myCustomTheme = new MudTheme() {
         Palette = new Palette() {
-            Primary = "#307160",
-            Secondary = "#6f9467",
-            Tertiary = "#9eb08d",
+            Primary = "#1259A1",
+            Secondary = "#3EB3E6",
+            Tertiary = "#E69E27",
+            Background = "#F5F5F5"
         },
         LayoutProperties = new LayoutProperties() {
             DrawerWidthLeft = "260px",
             DrawerWidthRight = "300px"
         }
     };
+
+    bool _drawerOpen = false;
+
+    void DrawerToggle() {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private async Task Logout() {
+        await UserService.LogoutAsync();
+        NavManager.NavigateTo($"/");
+    }
+
+    private void Login() {
+        NavManager.NavigateTo($"/auth");
+    }
+
 }

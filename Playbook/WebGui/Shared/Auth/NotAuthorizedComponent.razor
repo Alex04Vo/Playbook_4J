@@ -1,0 +1,27 @@
+﻿@inject NavigationManager NavManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-sm-auto"></div>
+        <div class="col-lg-6 col-sm-10">
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">Zugriff abgelehnt</MudText>
+                    <br/>
+                    <MudText Typo="Typo.body1">Sie besitzen keine Berechtigungen um hier fortzufahren.</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton OnClick="NavigateToAuth" Variant="Variant.Filled" StartIcon="@Icons.Filled.Home" Color="Color.Primary" FullWidth="true">Home</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </div>
+        <div class="col-lg-3 col-sm-auto"></div>
+    </div>
+</div>
+
+@code {
+
+    private void NavigateToAuth() {
+        NavManager.NavigateTo("/");
+    }
+}

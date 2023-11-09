@@ -21,7 +21,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data" />
+      <_ContentIncludedByDefault Remove="Pages\Home\HomePage.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Home\LandingPage.razor" />
+      <_ContentIncludedByDefault Remove="Shared\Home\BookOverview\BookCardComponent.razor" />
+      <_ContentIncludedByDefault Remove="Shared\Home\BookOverview\BookOverviewComponent.razor" />
     </ItemGroup>
 
 </Project>

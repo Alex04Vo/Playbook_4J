@@ -1,0 +1,57 @@
+﻿@using Model.Entities.Books
+@using Model.Entities.Sections.RuleSections
+@using Domain.Repositories.Implementation
+@using Domain.Repositories.Interfaces
+@inject IBookRepository BookRepository
+
+@if (Books is not null) {
+    <MudPaper Class="container-fluid p-3">
+        @if (ShowHeading) {
+            <div class="row my-2">
+                <MudText Color="Color.Primary" Typo="Typo.h5">
+                    Books:
+                </MudText>
+            </div>
+        }
+        <div class="row">
+            @foreach (var book in Books.Take(3)) {
+                <div class="col-4">
+                    <BookCardComponent Book="@book"/>
+                </div>
+            }
+        </div>
+    </MudPaper>
+}
+
+@code {
+
+    [Parameter]
+    public List<Book>? Books { get; set; } = null!;
+
+    [Parameter]
+    public bool ShowHeading { get; set; } = false;
+
+    protected override async Task OnParametersSetAsync() {
+        try {
+            if (Books is null) {
+                Books = await BookRepository.ReadAllWithTitlePageAsync();
+            }
+            if (!Books.Any() || Books.Count < 3) {
+                for (int i = 0; i <= 3 - Books.Count; i++) {
+                    Books.Add(new Book() {
+                        Title = "Book X",
+                        ImageUrl = "images/test/title.jpg",
+                        TitlePage = new RuleSection() {
+                            Content = "Example Book, is very cool!"
+                        }
+                    });
+                }
+            }
+        }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+}

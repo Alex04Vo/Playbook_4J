@@ -1,0 +1,21 @@
+﻿<MudDialog>
+    <DialogContent>
+        <div class="d-flex justify-content-center">
+             <MudImage Src="/images/flight/map.png" Alt="Map" Height="600" Elevation="10" Class="rounded-lg"/>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close" ButtonType="ButtonType.Button" Variant="Variant.Filled"
+                   Size="Size.Small" Color="Color.Primary" Class="m-1">
+            Close
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+}

@@ -689,7 +689,7 @@ VALUES (42, 0, 6);
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID, SECTION_ID, CONTENT)
 VALUES (43, 23, 316, 'If the number is 7 or 8 you are stuck. The mud engulfs you up to your armpits. Your horse gives one last despairing scream as its muzzle disappears into the bubbling mud. ');
 INSERT INTO RANDOM_OUTCOMES (OUTCOME_ID, MIN, MAX)
-VALUES (43, 7, 8);
+VALUES (43, 7, 9);
 
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID, SECTION_ID, CONTENT)
 VALUES (44, 23, -1, 'the foul-smelling bog sucks you under and claims another victim. Your life and your mission end here.');
@@ -5327,7 +5327,7 @@ VALUES (247, 243, 4);
 INSERT INTO EVENTS_BT (EVENT_ID, SECTION_ID, RANKING)
 VALUES (75, 247, 1);
 INSERT INTO ITEM_EVENTS_BT (EVENT_ID, ITEM_ID)
-VALUES (75, 10);
+VALUES (75, 9);
 INSERT INTO ACQUIRE_ITEM_EVENTS(EVENT_ID)
 VALUES (75);
 
@@ -6254,6 +6254,8 @@ VALUES (293, 289, 6);
 -- OUTCOMES
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID,  SECTION_ID, CONTENT)
 VALUES (479, 293, 142, 'Turn to');
+INSERT INTO DEFAULT_OUTCOMES (OUTCOME_ID)
+VALUES (479);
 
 -- ---------------------------------------------------------------------------- --
 --  STORY_SECTION: 290
@@ -6276,7 +6278,7 @@ VALUES (96);
 INSERT INTO OUTCOMES_BT (OUTCOME_ID,  ROOT_SECTION_ID,  SECTION_ID, CONTENT)
 VALUES (480, 294, 143, 'Turn to');
 INSERT INTO DEFAULT_OUTCOMES (OUTCOME_ID)
-VALUES (479);
+VALUES (480);
 
 -- ---------------------------------------------------------------------------- --
 --  STORY_SECTION: 291

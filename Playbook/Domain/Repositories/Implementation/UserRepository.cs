@@ -39,6 +39,8 @@ public class UserRepository : ARepository<User>, IUserRepository {
 
         if (user is null) return null;
 
+        if (String.IsNullOrWhiteSpace(model.UserName) || String.IsNullOrWhiteSpace(model.Password)) return null!;
+        
         if (!User.VerifyPassword(model.Password, user.PasswordHash)) return null!;
 
         return user.ClearSensitiveData();

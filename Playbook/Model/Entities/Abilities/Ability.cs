@@ -17,4 +17,11 @@ public class Ability {
     [Required, StringLength(100)]
     [Column("IMAGE_URL")]
     public string ImageUrl { get; set; }
+
+    public string ToReadableType() {
+
+        var text = this.Type.ToString().Replace('_', ' ').ToLower();
+        return char.ToUpper(text[0]) + text.Substring(1);
+
+    }
 }

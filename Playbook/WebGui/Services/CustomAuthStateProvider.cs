@@ -27,7 +27,16 @@ public class CustomAuthStateProvider : AuthenticationStateProvider {
         _logger = logger;
     }
 
-    public User? CurrentUser { get; private set; }
+    private User? _currentUser;
+    public User? CurrentUser {
+        get => _currentUser;
+        private set {
+            _currentUser = value;
+            LoginStateChanged.Invoke();
+        }
+    }
+    
+    public event Func<bool> LoginStateChanged;
 
     private static AuthenticationState Anonymous => new(new ClaimsPrincipal(new ClaimsIdentity()));
 

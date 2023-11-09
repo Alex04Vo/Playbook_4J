@@ -1,0 +1,60 @@
+﻿@using Model.Entities.Heroes.Inventories
+@using System.ComponentModel.DataAnnotations
+@using Domain.Repositories.Interfaces
+@using Model.Entities.Items
+@using WebGui.Services
+@inject SessionService SessionService
+@inject IHeroRepository HeroRepository
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (Item is not null) {
+            <div class="container-md">
+                <MudText Color="Color.Primary" Typo="Typo.h6">Item: <strong>@Item.Name</strong></MudText>
+                <br/>
+                <div>
+                    <MudButton Color="Color.Primary" Variant="Variant.Outlined"
+                               Class="m-2 w-100" OnClick="AcquireItemAsync">
+                        Yes, i will take -> @Item.Name
+                    </MudButton>
+                </div>
+                <div>
+                    <MudButton Color="Color.Tertiary" Variant="Variant.Outlined"
+                               Class="m-2 w-100" OnClick="Close">
+                        No, I will not take the Item.
+                    </MudButton>
+                </div>
+            </div>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public AItem? Item { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task AcquireItemAsync() {
+        if (SessionService.CurrentSession is not null && Item is not null) {
+            if (!SessionService.CurrentSession.Hero.Inventory.Items.Exists(i => i.ItemId == Item.Id)) {
+                SessionService.CurrentSession.Hero.Inventory.Items.Add(new InventoryItem() {
+                    Item = this.Item
+                });
+                await HeroRepository.UpdateAsync(SessionService.CurrentSession.Hero);
+                Snackbar.Add($"You have successful taken: {Item.Name}!", Severity.Success);
+            }
+            else {
+                Snackbar.Add($"You already have this item in your inventory!", Severity.Info);
+            }
+
+            Close();
+        }
+    }
+
+}

@@ -1,36 +1,85 @@
-﻿@page "/books/{BookId:int}/sections/{SectionNr:int}"
+﻿@page "/s/{SessionId:int}/books/{BookId:int}/sections/{SectionNr:int}"
 
 @using Model.Entities.Sections.StorySections
 @using Domain.Repositories.Interfaces
 @using System.ComponentModel.DataAnnotations
 @using Model.Entities.Outcomes
+@using Model.Entities.Outcomes.Models
+@using Model.Entities.Sessions
+@using WebGui.Services
+@using System.Collections.Specialized
+@using Model.Entities.Events
+@inject UserService UserService
+@inject SessionService SessionService
 @inject IStorySectionRepository StorySectionRepository
-
+@inject ISessionRepository SessionRepository
+@inject IEventRepository EventRepository
 
 @if (Section is not null) {
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                <StorySectionComponent Section="@Section"/>
-            </div>
-        </div>
-    </div>
-    
+    <PageTitle>@Section.Book.Title - @Section.SectionNumber</PageTitle>  
 }
+else {
+    <PageTitle>Game</PageTitle>
+}
+ 
+
+<AuthorizeView>
+    <Authorized>
+        @if (_isAuthorizedForSession) {
+            @if (Section is not null) {
+                <StorySectionComponent Section="@Section" Outcomes="@Outcomes" Events="@Events"/>
+            }
+        }
+        else {
+            <NotAuthorizedComponent/>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <NotAuthenticatedComponent/>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
+
+    [Parameter, Required]
+    public int SessionId { get; set; }
+    
     [Parameter, Required]
     public int BookId { get; set; }
-    
+
     [Parameter, Required]
     public int SectionNr { get; set; }
 
+    private bool _isAuthorizedForSession = false;
+
     public StorySection? Section { get; set; }
-    
-    public List<AOutcome> Outcomes { get; set; } = new();
+    public List<DisplayOutcome> Outcomes { get; set; } = new();
+    public List<AEvent> Events { get; set; } = new();
 
     protected override async Task OnParametersSetAsync() {
-        Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+        try {
+            if (UserService.CurrentUser is not null) {
+                var session = await SessionService.CheckAndSetCurrentSession(SessionId, UserService.CurrentUser.Id);
+                _isAuthorizedForSession = session is not null;
+                if (_isAuthorizedForSession) {
+                    Section = await StorySectionRepository.ReadStorySectionAsync(BookId, SectionNr);
+                    Outcomes = new List<DisplayOutcome>();
+                    Events = new List<AEvent>();
+                    if (Section is not null) {
+                        Events = await EventRepository.GetEventsOfSectionAsync(Section.Id);
+                        
+                        var random = new Random().Next(0, 10);
+                        if (SessionService.CurrentSession is not null && Section is not null && Section.Outcomes.Any()) {
+                            Section.Outcomes.ForEach(outcome => Outcomes.Add(new DisplayOutcome(outcome, SessionService.CurrentSession.Hero, random)));
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
+        }
     }
-
 }

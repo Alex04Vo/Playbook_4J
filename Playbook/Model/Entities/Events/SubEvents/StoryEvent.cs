@@ -17,4 +17,8 @@ public class StoryEvent : AEvent {
     [Required, StringLength(100)]
     [Column("IMAGE_URL")]
     public string ImageUrl { get; set; }
+
+    public override string GetReadableType() {
+        return "Stroy Event";
+    }
 }

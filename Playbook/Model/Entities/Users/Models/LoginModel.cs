@@ -12,10 +12,9 @@ public class LoginModel {
         Password = password;
     }
 
-    [Required] 
-    [EmailAddress] 
-    public string UserName { get; set; } = null!;
+    [Required]
+    public string UserName { get; set; } = "";
 
     [Required] 
-    public string Password { get; set; } = null!;
+    public string Password { get; set; } = "";
 }

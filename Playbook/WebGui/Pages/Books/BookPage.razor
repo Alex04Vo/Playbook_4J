@@ -1,35 +1,85 @@
-﻿@page "/books"
-@page "/book/{BookId:int}"
+﻿@page "/books/{BookId:int}"
 
 @using Domain.Repositories.Interfaces
 @using Model.Entities.Books
+@using System.ComponentModel.DataAnnotations
+@using Model.Entities.Books.Models
+@using Model.Entities.Sections.RuleSections
 @inject IBookRepository BookRepository
 
-@if (BookId.HasValue) {
-    <BookComponent Book="@Book"/>
+@if (Model is not null) {
+    <div class="container">
+        <MudCard>
+            <MudCardHeader>
+                <MudText Color="Color.Primary" Typo="Typo.h4">@Model.Book.Title</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-9">
+                            <MudText Typo="Typo.body1">
+                                @Model.RuleSections.SingleOrDefault(s => s.SectionType == ESectionType.TITLE_PAGE)?.Content
+                            </MudText>
+                        </div>
+                        <div class="col-3 d-flex justify-content-center">
+                            <MudImage Src="@Model.Book.ImageUrl" Alt="@Model.Book.Title" Height="150" Elevation="10" Class="rounded-lg"/>
+                        </div>
+                    </div>
+                </div>
+
+                <br/>
+                <MudDivider/>
+                <br/>
+                <MudCard>
+                    <MudTabs Elevation="1" Rounded="true" Centered="true" Color="@Color.Primary" Class="pa-6">
+                        <MudTabPanel Text="Story">
+                            <br/>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">The Story So Far:</MudText>
+                            <br/>
+                            <MudText Typo="Typo.body2">
+                                @((MarkupString) Model.RuleSections.SingleOrDefault(s => s.SectionType == ESectionType.THE_STORY_SO_FAR)?.Content)
+                            </MudText>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Game Sections">
+                            <br/>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">Sections:</MudText>
+                            <br/>
+                            <MudPaper Style="background-color:  rgb(18, 89, 161, 0.05);" Class="py-2">
+                                @foreach (var section in Model.StorySections) {
+                                    <StorySectionOverview Section="section"/>
+                                }
+                            </MudPaper>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudCard>
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <MudScrollToTop>
+        <MudFab Color="Color.Secondary" Icon="@Icons.Material.Filled.ArrowUpward"/>
+    </MudScrollToTop>
 }
 else {
-    if (Books.Count > 0) {
-        foreach (var book in Books) {
-            <BookComponent Book="@book"/>
-        }
-    }
+    <NotFoundComponent/>
 }
 
 @code {
+
+    [Required]
     [Parameter]
     public int? BookId { get; set; }
 
-    public Book? Book { get; set; }
-
-    public List<Book> Books { get; set; } = new();
+    public BookOverviewModel? Model { get; set; } = new();
 
     protected override async Task OnParametersSetAsync() {
-        if (BookId.HasValue) {
-            Book = await BookRepository.ReadAsync(BookId.Value);
+        try {
+            if (BookId.HasValue) {
+                Model = await BookRepository.ReadCompleteBookOverviewAsync(BookId.Value);
+            }
         }
-        else {
-            Books = await BookRepository.ReadAsync(0, 10);
+        catch (Exception e) {
+            Console.WriteLine(e);
+            throw;
         }
     }
 

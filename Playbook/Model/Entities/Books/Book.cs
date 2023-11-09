@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Model.Entities.Sections.RuleSections;
 
 namespace Model.Entities.Books; 
 
@@ -16,4 +17,7 @@ public class Book {
     [Required, StringLength(100)]
     [Column("IMAGE_URL")]
     public string ImageUrl { get; set; }
+
+    [NotMapped] 
+    public RuleSection? TitlePage { get; set; } = null!;
 }
